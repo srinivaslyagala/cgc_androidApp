@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/margin_20"
+    android:layout_marginRight="@dimen/margin_20"
+    android:orientation="vertical">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/staff_image"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/margin_10"
+        android:src="@drawable/avatar" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:background="@drawable/rounded_edittext"
+        android:hint="@string/first_name"
+        android:importantForAutofill="no"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textSize="@dimen/large_text_size"
+        tools:ignore="TextFields"
+        android:id="@+id/edtFirstName" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:background="@drawable/rounded_edittext"
+        android:hint="@string/last_name"
+        android:importantForAutofill="no"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textSize="@dimen/large_text_size"
+        tools:ignore="TextFields"
+        android:id="@+id/edtlastName" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:background="@drawable/rounded_edittext"
+        android:hint="@string/email_address"
+        android:importantForAutofill="no"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textSize="@dimen/large_text_size"
+        tools:ignore="TextFields"
+        android:id="@+id/edtEmail" />
+
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:background="@drawable/rounded_edittext"
+        android:hint="@string/mobile_no"
+        android:importantForAutofill="no"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textSize="@dimen/large_text_size"
+        tools:ignore="TextFields"
+        android:id="@+id/edtMobile" />
+
+
+    <Button
+        android:id="@+id/btnUpdateStaff"
+        style="@style/CEVABtnTheme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="@dimen/margin_10"
+        android:text="@string/update_details"
+        android:textAllCaps="true"
+        tools:ignore="RtlHardcoded" />
+
+    <Button
+        android:id="@+id/btnDeleteStaff"
+        style="@style/CEVABtnTheme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="@dimen/margin_10"
+        android:text="@string/delete_staff"
+        android:textAllCaps="true"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:text="@string/assigned_child_list"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/assigned_child_List"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

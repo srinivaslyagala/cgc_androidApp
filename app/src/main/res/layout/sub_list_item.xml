@@ -1,0 +1,69 @@
+<LinearLayout android:id="@+id/addSubTaskitem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:weightSum="4"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:id="@+id/txtSubTaskName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:layout_weight="3"
+        android:text="@string/sub_task_name"
+        android:visibility="visible" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/edtSubTaskName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:layout_weight="3"
+        android:background="@drawable/rounded_edittext"
+        android:hint="@string/sub_task_name"
+        android:importantForAutofill="no"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textSize="@dimen/large_text_size"
+        android:visibility="gone"
+        tools:ignore="TextFields" />
+
+    <ImageView
+        android:id="@+id/imgEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="0.5"
+        android:src="@drawable/ic_edit_black_24dp"
+        tools:ignore="PrivateResource" />
+
+    <ImageView
+        android:id="@+id/imgOK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="0.25"
+        android:src="@drawable/ic_check_circle_black_24dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/imgCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="0.25"
+        android:src="@drawable/ic_cancel_black_24dp"
+        android:visibility="gone" />
+
+    <Switch
+        android:id="@+id/updateStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|end"
+        android:layout_weight="0.5"
+        android:gravity="center|end" />
+</LinearLayout>
+

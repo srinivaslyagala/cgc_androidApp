@@ -1,0 +1,157 @@
+apply plugin: 'com.android.application'
+def versionMajor = 1
+def versionMinor = 1
+def versionPatch = 1
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.rolvatech.cgc"
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+        signingConfigs {
+            release {
+                storeFile file("cgc.jks")
+                storePassword "123456Aa"
+                keyAlias "key0"
+                keyPassword "123456Aa"
+            }
+        }
+    }
+
+    buildTypes {
+        applicationVariants.all { variant ->
+
+            variant.outputs.all {
+                outputFileName = "cgc-" + "${variant.name}-${variant.versionName}.apk"
+            }
+        }
+
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+    flavorDimensions("cgc")
+    productFlavors {
+        normal {
+            applicationId = "com.rolvatech.cgc.debug"
+            versionName = "1.0.5"
+            versionCode = 4
+            dimension = "cgc"
+            resValue "string", "app_name", "CGC-Debug"
+            buildConfigField "String", "APP_NAME", '"CGC-Debug"'
+            buildConfigField "String", "FLAVOUR", '"NORMAL"'
+            buildConfigField "String", "SERVER_URL", '"http://13.127.236.108:8080/"'
+        }
+        dev {
+            applicationId = "com.rolvatech.cgc.dev"
+            versionName = "1.0.0.MOBILE-SNAPSHOT.0"
+            versionCode = 1
+            dimension = "cgc"
+            resValue "string", "app_name", "CGC-DEV"
+            buildConfigField "String", "FLAVOUR", '"DEV"'
+            buildConfigField "String", "APP_NAME", '"CGC-DEV"'
+            buildConfigField "String", "SERVER_URL", '"http://13.127.236.108:8080/"'
+            buildConfigField "boolean", "IS_GE", "true"
+            buildConfigField "String", "LOG_FILENAME", '"cgc_dev_logs"'
+        }
+        qa {
+            applicationId = "com.rolvatech.cgc.qa"
+            versionName = "1.0.0.MOBILE-SNAPSHOT.0"
+            versionCode = 1
+            dimension = "cgc"
+            resValue "string", "app_name", "CGC-QA"
+            buildConfigField "String", "FLAVOUR", '"TEST"'
+            buildConfigField "String", "APP_NAME", '"CGC-QA"'
+            buildConfigField "String", "SERVER_URL", '"http://13.127.236.108:8080/"'
+        }
+        uat {
+            applicationId = "com.rolvatech.cgc.uat"
+            versionName = "1.0.0.MOBILE-SNAPSHOT.0"
+            versionCode = 1
+            dimension = "cgc"
+            resValue "string", "app_name", "CGC-UAT"
+            buildConfigField "String", "FLAVOUR", '"UAT"'
+            buildConfigField "String", "APP_NAME", '"CGC-UAT"'
+            buildConfigField "String", "SERVER_URL", '"http://13.127.236.108:8080/"'
+        }
+        prod {
+            applicationId = "com.rolvatech.cgc"
+            versionName = "1.0.1"
+            versionCode = 1
+            dimension = "cgc"
+            resValue "string", "app_name", "CGC"
+            buildConfigField "String", "FLAVOUR", '""'
+            buildConfigField "String", "APP_NAME", '"CGC"'
+            buildConfigField "String", "SERVER_URL", '"http://13.127.236.108:8080/"'
+        }
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+    dataBinding {
+        enabled = true
+    }
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.basgeekball:awesome-validation:1.3'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.navigation:navigation-fragment:2.2.1'
+    implementation 'androidx.navigation:navigation-ui:2.2.1'
+    testImplementation 'junit:junit:4.13'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'com.github.pchmn:MaterialChipsInput:1.0.8'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    annotationProcessor 'androidx.room:room-compiler:2.2.5'
+    implementation 'androidx.room:room-runtime:2.2.5'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'io.fotoapparat.fotoapparat:library:2.2.0'
+    api 'com.squareup.okhttp3:okhttp:4.4.0'
+    api 'com.squareup.okio:okio:2.4.3'
+    api 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.evernote:android-job:1.2.5'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61'
+    debugImplementation 'com.amitshekhar.android:debug-db:0.4.0'
+    implementation 'com.github.pwittchen:networkevents:2.1.6'
+    implementation 'com.squareup:otto:1.3.8'
+    implementation 'com.github.andrefrsousa:SuperBottomSheet:1.3.0'
+    implementation 'org.apache.commons:commons-io:1.3.2'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.jjoe64:graphview:4.2.2'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'com.github.chinalwb:are:0.1.7'
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
+    implementation files('libs\\itextg-5.5.8.jar')
+}

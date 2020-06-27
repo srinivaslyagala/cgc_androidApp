@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="@dimen/margin_15"
+    android:layout_marginRight="@dimen/margin_20"
+    android:gravity="right"
+    android:orientation="horizontal">
+
+
+    <Button
+        android:id="@+id/btnNegative"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/CEVABtnTheme"
+        android:text="Negative" />
+
+    <Button
+        android:id="@+id/btnPositive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_15"
+        style="@style/CEVABtnTheme"
+        android:text="Positive" />
+</LinearLayout>

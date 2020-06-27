@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_dashboard_black_24dp"
+            android:iconTint="@android:color/black"
+            android:title="@string/dashboard" />
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/profile"
+            android:iconTint="@android:color/black"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/nav_staff"
+            android:icon="@drawable/staff"
+            android:iconTint="@android:color/black"
+            android:title="@string/staff_list" />
+        <item
+            android:id="@+id/nav_childlist"
+            android:icon="@drawable/ic_accessibility_black_24dp"
+            android:iconTint="@android:color/black"
+            android:title="@string/child_list" />
+
+        <item
+            android:id="@+id/nav_areas"
+            android:icon="@drawable/ic_assignment_black_24dp"
+            android:iconTint="@android:color/black"
+            android:title="@string/areas" />
+        <item
+            android:id="@+id/nav_change"
+            android:icon="@drawable/password_reset"
+            android:iconTint="@android:color/black"
+            android:title="@string/change_password" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/logout"
+            android:iconTint="@android:color/black"
+            android:title="@string/logout" />
+    </group>
+</menu>
