@@ -38,7 +38,9 @@
             android:padding="12dp"
             android:singleLine="true"
             android:textSize="@dimen/large_text_size"
-            tools:ignore="TextFields" />
+            tools:ignore="TextFields"
+            android:text="srinivaslayagala@gmail.com"
+            />
 
 
         <com.google.android.material.textfield.TextInputEditText
@@ -53,7 +55,9 @@
             android:padding="12dp"
             android:singleLine="true"
             android:textSize="@dimen/large_text_size"
-            tools:ignore="Autofill" />
+            tools:ignore="Autofill"
+            android:text="password"
+            />
 
 
         <Button

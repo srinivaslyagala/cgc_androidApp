@@ -1,10 +1,5 @@
 package com.rolvatech.cgc.dataobjects;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-
-
-
 import java.io.Serializable;
 
 public class ImageData implements Serializable {

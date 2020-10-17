@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,7 +13,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,16 +25,16 @@ import androidx.fragment.app.Fragment;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.bumptech.glide.Glide;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.rolvatech.cgc.APIClient;
 import com.rolvatech.cgc.R;
 import com.rolvatech.cgc.dataobjects.InstituteDTO;
 import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.AlertDialogManager;
+import com.rolvatech.cgc.utils.FileUtils;
 import com.rolvatech.cgc.utils.PrefUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,6 +42,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
@@ -49,6 +50,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rolvatech.cgc.utils.Constants.REQUEST_IMAGE_CODE;
 
 public class CreateStaffFragment extends Fragment {
     TextInputEditText edtMobile, edtlastName, edtFirstName, edtEmail, edtPassword;
@@ -57,29 +59,30 @@ public class CreateStaffFragment extends Fragment {
     String profileImage;
     AlertDialogManager alertDialogManager = new AlertDialogManager();
     ProgressDialog progressDialog;
-    private AwesomeValidation awesomeValidation=new AwesomeValidation(ValidationStyle.BASIC);
+    private AwesomeValidation awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.create_staff, container, false);
         edtFirstName = root.findViewById(R.id.edtFirstName);
-        edtlastName=root.findViewById(R.id.edtlastName);
+        edtlastName = root.findViewById(R.id.edtlastName);
         edtMobile = root.findViewById(R.id.edtMobile);
         edtEmail = root.findViewById(R.id.edtEmail);
         edtPassword = root.findViewById(R.id.edtPassword);
         staff_image = root.findViewById(R.id.staff_image);
 
-        awesomeValidation.addValidation(edtFirstName,"^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$","FirstName not valid!");
-        awesomeValidation.addValidation(edtlastName,"^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$","Last Name not valid!");
-        awesomeValidation.addValidation(edtMobile, Patterns.PHONE,"Mobile No not valid!");
-        awesomeValidation.addValidation(edtEmail,Patterns.EMAIL_ADDRESS,"Email not valid!");
-        awesomeValidation.addValidation(edtPassword,"^[a-zA-Z0-9@_]{1,}","Password Should be minimum 6 characters and contain a-zA-Z0-9@_.");
+        awesomeValidation.addValidation(edtFirstName, "^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$", "FirstName not valid!");
+        awesomeValidation.addValidation(edtlastName, "^[A-Za-z\\s]{1,}[\\.]{0,1}[A-Za-z\\s]{0,}$", "Last Name not valid!");
+        awesomeValidation.addValidation(edtMobile, Patterns.PHONE, "Mobile No not valid!");
+        awesomeValidation.addValidation(edtEmail, Patterns.EMAIL_ADDRESS, "Email not valid!");
+        awesomeValidation.addValidation(edtPassword, "^[a-zA-Z0-9@_]{1,}", "Password Should be minimum 6 characters and contain a-zA-Z0-9@_.");
 
         btnRegisterStaff = root.findViewById(R.id.btnRegisterStaff);
         staff_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectImage();
+                //selectImage();
+                showImgePicker();
             }
         });
         btnRegisterStaff.setOnClickListener(new View.OnClickListener() {
@@ -88,48 +91,49 @@ public class CreateStaffFragment extends Fragment {
                 registerStaff();
             }
         });
+
         return root;
     }
 
     public void registerStaff() {
 
-            if(awesomeValidation.validate()){
-                UserDTO user=new UserDTO();
-                user.setFirstName(edtFirstName.getText().toString());
-                user.setLastName(edtlastName.getText().toString());
-                user.setContact(edtMobile.getText().toString());
-                user.setEmail(edtEmail.getText().toString());
-                user.setUserName( edtEmail.getText().toString());
-                user.setPassword(edtPassword.getText().toString());
-                user.setProfileImage(profileImage);
-                InstituteDTO instituteDTO=new InstituteDTO();
-                instituteDTO.setId(Long.parseLong(PrefUtils.getStringPreference(getContext(),PrefUtils.INSTITUTE_ID)));
-                user.setInstitute(instituteDTO);
-                progressDialog = new ProgressDialog(getContext());
-                progressDialog.setMax(100);
-                progressDialog.setMessage("Processing....");
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.show();
-                new APIClient(getActivity()).getApi().registerStaff("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), user)
-                        .enqueue(new Callback<UserDTO>() {
-                            @Override
-                            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
-                                progressDialog.dismiss();
-                                if (response.isSuccessful() || response.code() == 200) {
-                                    alertDialogManager.showAlertDialog(getActivity(), "Success", "Staff Registered successfully", true);
-                                } else {
-                                    alertDialogManager.showAlertDialog(getActivity(), "Failure", "Staff Registration failed", true);
-                                }
+        if (awesomeValidation.validate()) {
+            UserDTO user = new UserDTO();
+            user.setFirstName(edtFirstName.getText().toString());
+            user.setLastName(edtlastName.getText().toString());
+            user.setContact(edtMobile.getText().toString());
+            user.setEmail(edtEmail.getText().toString());
+            user.setUserName(edtEmail.getText().toString());
+            user.setPassword(edtPassword.getText().toString());
+            user.setProfileImage(profileImage);
+            InstituteDTO instituteDTO = new InstituteDTO();
+            instituteDTO.setId(Long.parseLong(PrefUtils.getStringPreference(getContext(), PrefUtils.INSTITUTE_ID)));
+            user.setInstitute(instituteDTO);
+            progressDialog = new ProgressDialog(getContext());
+            progressDialog.setMax(100);
+            progressDialog.setMessage("Processing....");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();
+            new APIClient(getActivity()).getApi().registerStaff("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), user)
+                    .enqueue(new Callback<UserDTO>() {
+                        @Override
+                        public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                            progressDialog.dismiss();
+                            if (response.isSuccessful() || response.code() == 200) {
+                                alertDialogManager.showAlertDialog(getActivity(), "Success", "Staff Registered successfully", true);
+                            } else {
+                                alertDialogManager.showAlertDialog(getActivity(), "Failure", "Staff Registration failed", true);
                             }
+                        }
 
-                            @Override
-                            public void onFailure(Call<UserDTO> call, Throwable t) {
-                                progressDialog.dismiss();
-                            }
-                        });
-            }else {
+                        @Override
+                        public void onFailure(Call<UserDTO> call, Throwable t) {
+                            progressDialog.dismiss();
+                        }
+                    });
+        } else {
 
-            }
+        }
     }
 
     private void selectImage() {
@@ -214,7 +218,33 @@ public class CreateStaffFragment extends Fragment {
                 profileImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 // Log.w("path of image from gallery......******************.........", picturePath+"");
                 staff_image.setImageBitmap(thumbnail);
+            } else if (requestCode == REQUEST_IMAGE_CODE) {
+                //Image Uri will not be null for RESULT_OK
+
+                if (data != null) {
+
+                    File file = ImagePicker.Companion.getFile(data);
+                    if (file != null) {
+                        Glide.with(getActivity()).load(file.getAbsolutePath()).error(R.mipmap.ic_launcher).into(staff_image);
+                        profileImage = FileUtils.generateImageData(file);
+                    }
+                }
             }
         }
     }
+
+
+
+    private void showImgePicker() {
+        String[] mimeTypes = {"image/png", "image/jpg", "image/jpeg"};
+
+        ImagePicker.Companion.with(this)
+                .galleryMimeTypes(mimeTypes)
+                .crop()                    //Crop image(Optional), Check Customization for more option
+                .compress(512)            //Final image size will be less than 1 MB(Optional)
+                .maxResultSize(500, 500)    //Final image resolution will be less than 1080 x 1080(Optional)
+                .start(REQUEST_IMAGE_CODE);
+    }
+
+
 }

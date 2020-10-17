@@ -3,22 +3,15 @@ package com.rolvatech.cgc.application;
 import android.content.Context;
 import android.net.TrafficStats;
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
-import com.evernote.android.job.JobManager;
-import com.facebook.stetho.Stetho;
 import com.rolvatech.cgc.httpimage.FileSystemPersistence;
 import com.rolvatech.cgc.httpimage.HttpImageManager;
 import com.rolvatech.cgc.utils.FilesStorage;
-import com.rolvatech.cgc.utils.PrefUtils;
-
-import java.io.File;
-import java.util.Timer;
 
 public class CGCApplication extends MultiDexApplication {
     private static CGCApplication cgcApplication;

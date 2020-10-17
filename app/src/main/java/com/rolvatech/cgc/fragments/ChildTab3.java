@@ -2,60 +2,43 @@ package com.rolvatech.cgc.fragments;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.EditText;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import com.itextpdf.text.Anchor;
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chapter;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
-import com.itextpdf.text.List;
-import com.itextpdf.text.ListItem;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Section;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.rolvatech.cgc.APIClient;
 import com.rolvatech.cgc.R;
-import com.rolvatech.cgc.utils.DateUtils;
+import com.rolvatech.cgc.model.UserDetailsResponse;
+import com.rolvatech.cgc.utils.FileUtils;
+import com.rolvatech.cgc.utils.PdfGenerator;
 import com.rolvatech.cgc.utils.PrefUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
 import java.util.Random;
+
+import dmax.dialog.SpotsDialog;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.rolvatech.cgc.utils.FileUtils.showMessage;
 
 
 public class ChildTab3 extends Fragment {
@@ -114,7 +97,7 @@ public class ChildTab3 extends Fragment {
      *
      * @param activity
      */
-    public  void verifyStoragePermissions(Activity activity) {
+    public void verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
         if (ContextCompat.checkSelfPermission(activity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -138,7 +121,8 @@ public class ChildTab3 extends Fragment {
 
 
         } else {
-            createPDF();
+            //createPDF();
+            captureChildDetails();
         }
     }
 
@@ -153,7 +137,8 @@ public class ChildTab3 extends Fragment {
 
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    createPDF();
+                    //createPDF();
+                    captureChildDetails();
 
                 } else {
 
@@ -168,181 +153,101 @@ public class ChildTab3 extends Fragment {
         }
     }
 
-    public  void createPDF() {
+    public void createPDF(String aboutChild) {
         //create document object
-        Document document = new Document();
-        new APIClient(this.getContext()).getApi().getChildReportDetails("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),childId).enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                assert response.body()!=null;
-                try {
-                    Log.i("Generate PDF", "onResponse: PDF Report Response:"+response.body());
-                    String outpath = getContext().getExternalFilesDir("rolvatech").getAbsolutePath() ;
-                    File file=new File(outpath,DateUtils.getCurrDeviceDate("yyyyMMdd_HHmmss") + ".pdf");
-                    file.createNewFile();
-                    PdfWriter.getInstance(document, new FileOutputStream(file));
-                    document.open();
-                    addMetaData(document);
-                    addTitlePage(document);
-                    addContent(document);
-                    document.close();
-                    Toast.makeText(getContext(),"File Download to location:"+file.getAbsolutePath(),Toast.LENGTH_LONG);
-//                    Intent target = new Intent(Intent.ACTION_VIEW);
-//                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//                    target.setDataAndTypeAndNormalize(Uri.fromFile(file),"application/pdf");
-//                    target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-//
-//                    Intent intent = Intent.createChooser(target, "Open File");
-//                    try {
-//                        startActivity(intent);
-//                    } catch (ActivityNotFoundException e) {
-//                        // Instruct the user to install a PDF reader here, or something
-//                    }
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (DocumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
 
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+        AlertDialog spotsDialog = new SpotsDialog.Builder()
+                .setContext(getActivity())
+                .setMessage("Loading child info...")
+                .build();
 
-            }
-        });
+        spotsDialog.show();
+
+
+        new APIClient(this.getContext()).getApi()
+                .getChildReportDetails("Bearer " +
+                        PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), childId)
+                .enqueue(new Callback<UserDetailsResponse>() {
+                    @Override
+                    public void onResponse(Call<UserDetailsResponse> call, Response<UserDetailsResponse> response) {
+
+                        spotsDialog.dismiss();
+
+                        if (response.isSuccessful() || response.code() == 200) {
+
+                            try {
+
+                                UserDetailsResponse userDetailsResponse = (UserDetailsResponse) response.body();
+
+                                if (userDetailsResponse != null) {
+
+                                    String fileName = System.currentTimeMillis() + ".pdf";
+                                    File file = new File(FileUtils.getAppPath(getActivity()), fileName);
+
+                                    boolean created = PdfGenerator.generatePdf(file, userDetailsResponse, aboutChild);
+
+                                    if (created) {
+                                        showGeneratedPdf(file);
+                                    }
+
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        } else {
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserDetailsResponse> call, Throwable t) {
+                        spotsDialog.dismiss();
+                    }
+                });
     }
 
-    // iText allows to add metadata to the PDF which can be viewed in your Adobe
-    // Reader
-    // under File -> Properties
-    private static void addMetaData(Document document) {
-        document.addTitle("rolvatech PDF");
-        document.addSubject("Using iText");
-        document.addKeywords("rolvatech, PDF, iText");
-        document.addAuthor("rolvatech");
-        document.addCreator("rolvatech");
+
+    private void captureChildDetails() {
+
+        LayoutInflater layoutInflaterAndroid = LayoutInflater.from(getActivity());
+        View mView = layoutInflaterAndroid.inflate(R.layout.user_input_dialog_box, null);
+        AlertDialog.Builder alertDialogBuilderUserInput = new AlertDialog.Builder(getActivity());
+        alertDialogBuilderUserInput.setView(mView);
+
+        final EditText userInputDialogEditText = (EditText) mView.findViewById(R.id.userInputDialog);
+        alertDialogBuilderUserInput
+                .setCancelable(false)
+                .setPositiveButton("Generate", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogBox, int id) {
+                        String aboutChild = userInputDialogEditText.getText().toString().trim();
+                        createPDF(aboutChild);
+                    }
+                })
+
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialogBox, int id) {
+                                dialogBox.cancel();
+                            }
+                        });
+
+        AlertDialog alertDialogAndroid = alertDialogBuilderUserInput.create();
+        alertDialogAndroid.show();
     }
 
-    private static void addTitlePage(Document document)
-            throws DocumentException {
-        Paragraph preface = new Paragraph();
-        // We add one empty line
-        addEmptyLine(preface, 1);
-        // Lets write a big header
-        preface.add(new Paragraph("Title of the document", catFont));
+    private void showGeneratedPdf(File file) {
+        try {
 
-        addEmptyLine(preface, 1);
-        // Will create: Report generated by: _name, _date
-        preface.add(new Paragraph("Report generated by: " + System.getProperty("user.name") + ", " + new Date(), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                smallBold));
-        addEmptyLine(preface, 3);
-        preface.add(new Paragraph("This document describes something which is very important ",
-                smallBold));
+            FileUtils.openFile(getActivity(), file);
 
-        addEmptyLine(preface, 8);
 
-        preface.add(new Paragraph("This document is a preliminary version and not subject to your license agreement or any other agreement with vogella.com ;-).",
-                redFont));
-
-        document.add(preface);
-        // Start a new page
-        document.newPage();
-    }
-
-    private static void addContent(Document document) throws DocumentException {
-        Anchor anchor = new Anchor("First Chapter", catFont);
-        anchor.setName("First Chapter");
-
-        // Second parameter is the number of the chapter
-        Chapter catPart = new Chapter(new Paragraph(anchor), 1);
-
-        Paragraph subPara = new Paragraph("Subcategory 1", subFont);
-        Section subCatPart = catPart.addSection(subPara);
-        subCatPart.add(new Paragraph("Hello"));
-
-        subPara = new Paragraph("Subcategory 2", subFont);
-        subCatPart = catPart.addSection(subPara);
-        subCatPart.add(new Paragraph("Paragraph 1"));
-        subCatPart.add(new Paragraph("Paragraph 2"));
-        subCatPart.add(new Paragraph("Paragraph 3"));
-
-        // add a list
-        createList(subCatPart);
-        Paragraph paragraph = new Paragraph();
-        addEmptyLine(paragraph, 5);
-        subCatPart.add(paragraph);
-
-        // add a table
-        createTable(subCatPart);
-
-        // now add all this to the document
-        document.add(catPart);
-
-        // Next section
-        anchor = new Anchor("Second Chapter", catFont);
-        anchor.setName("Second Chapter");
-
-        // Second parameter is the number of the chapter
-        catPart = new Chapter(new Paragraph(anchor), 1);
-
-        subPara = new Paragraph("Subcategory", subFont);
-        subCatPart = catPart.addSection(subPara);
-        subCatPart.add(new Paragraph("This is a very important message"));
-
-        // now add all this to the document
-        document.add(catPart);
-
-    }
-
-    private static void createTable(Section subCatPart)
-            throws BadElementException {
-        PdfPTable table = new PdfPTable(3);
-
-        // t.setBorderColor(BaseColor.GRAY);
-        // t.setPadding(4);
-        // t.setSpacing(4);
-        // t.setBorderWidth(1);
-
-        PdfPCell c1 = new PdfPCell(new Phrase("Table Header 1"));
-        c1.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(c1);
-
-        c1 = new PdfPCell(new Phrase("Table Header 2"));
-        c1.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(c1);
-
-        c1 = new PdfPCell(new Phrase("Table Header 3"));
-        c1.setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.addCell(c1);
-        table.setHeaderRows(1);
-
-        table.addCell("1.0");
-        table.addCell("1.1");
-        table.addCell("1.2");
-        table.addCell("2.1");
-        table.addCell("2.2");
-        table.addCell("2.3");
-
-        subCatPart.add(table);
-
-    }
-
-    private static void createList(Section subCatPart) {
-        List list = new List(true, false, 10);
-        list.add(new ListItem("First point"));
-        list.add(new ListItem("Second point"));
-        list.add(new ListItem("Third point"));
-        subCatPart.add(list);
-    }
-
-    private static void addEmptyLine(Paragraph paragraph, int number) {
-        for (int i = 0; i < number; i++) {
-            paragraph.add(new Paragraph(" "));
+        } catch (ActivityNotFoundException ex) {
+            showMessage(getActivity(), "ActivityNotFoundException");
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
-
 }

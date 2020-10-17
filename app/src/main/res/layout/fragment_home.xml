@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="center"
     android:orientation="vertical">
 
@@ -78,7 +79,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_accessibility_black_24dp"
-                        android:tint="@android:color/white"
+                        app:tint="@android:color/white"
                         tools:ignore="ContentDescription" />
                 </LinearLayout>
 
@@ -153,7 +154,7 @@
                         android:layout_height="wrap_content"
                         android:contentDescription="TODO"
                         android:src="@drawable/ic_group_black_24dp"
-                        android:tint="@android:color/white" />
+                        app:tint="@android:color/white" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -232,7 +233,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_assignment_black_24dp"
-                        android:tint="@android:color/white" />
+                        app:tint="@android:color/white" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -306,7 +307,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_insert_chart_black_24dp"
-                        android:tint="@android:color/white" />
+                        app:tint="@android:color/white" />
                 </LinearLayout>
 
             </LinearLayout>
