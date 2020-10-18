@@ -49,29 +49,15 @@ public class ChildListAdapter extends RecyclerView.Adapter<ChildListAdapter.View
         Child child = childArrayList.get(position);
        // holder.imageView.setImageBitmap(FileUtils.StringToBitMap(child.getProfileImage()));
         holder.textView.setText(child.getFirstName() + " " + child.getLastName());
-        new APIClient(holder.imageView.getContext()).getApi().getProfileImage("Bearer " + PrefUtils.getStringPreference(holder.imageView.getContext(), PrefUtils.TOKEN),""+child.getId()).enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                if(response.isSuccessful()){
-                    File sdcard = Environment.getDownloadCacheDirectory();
-                    String base64=response.body();
-                    Log.i("Image Async Download", "onResponse: Image String downloaded"+base64.length()+" file"+sdcard.getAbsolutePath()+"/cgc/images/"+child.getId()+".temp");
-                    if(base64 != null) {
-                        String[] images = base64.split(",");
-                        if(images.length > 0){
-                            String base64Image = images[images.length - 1];
-                            FileUtils.writeFile(base64.getBytes(),sdcard.getAbsolutePath()+"/cgc/images/",child.getId()+".temp");
-                            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            holder.imageView.setImageBitmap(decodedByte);
-                        }
-                    }
-                }
+        if(child.getProfileImage() != null) {
+            String[] images = child.getProfileImage().split(",");
+            if(images.length > 0){
+                String base64Image = images[images.length - 1];
+                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                holder.imageView.setImageBitmap(decodedByte);
             }
-            @Override
-            public void onFailure(Call<String> call, Throwable t) {
-            }
-        });
+        }
     }
 
     @Override
