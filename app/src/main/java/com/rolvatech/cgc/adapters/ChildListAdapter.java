@@ -55,12 +55,17 @@ public class ChildListAdapter extends RecyclerView.Adapter<ChildListAdapter.View
                 if(response.isSuccessful()){
                     File sdcard = Environment.getDownloadCacheDirectory();
                     String base64=response.body();
-                    String base64Image = base64.split(",")[1];
-                    Log.i("Image Async Download", "onResponse: Image String downloaded"+base64Image.length()+" file"+sdcard.getAbsolutePath()+"/cgc/images/"+child.getId()+".temp");
-                    FileUtils.writeFile(base64Image.getBytes(),sdcard.getAbsolutePath()+"/cgc/images/",child.getId()+".temp");
-                    byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    holder.imageView.setImageBitmap(decodedByte);
+                    Log.i("Image Async Download", "onResponse: Image String downloaded"+base64.length()+" file"+sdcard.getAbsolutePath()+"/cgc/images/"+child.getId()+".temp");
+                    if(base64 != null) {
+                        String[] images = base64.split(",");
+                        if(images.length > 0){
+                            String base64Image = images[images.length - 1];
+                            FileUtils.writeFile(base64.getBytes(),sdcard.getAbsolutePath()+"/cgc/images/",child.getId()+".temp");
+                            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                            holder.imageView.setImageBitmap(decodedByte);
+                        }
+                    }
                 }
             }
             @Override

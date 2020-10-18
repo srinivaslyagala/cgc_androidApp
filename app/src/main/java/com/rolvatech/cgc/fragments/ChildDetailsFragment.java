@@ -50,6 +50,7 @@ import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.AlertDialogManager;
 import com.rolvatech.cgc.utils.FileUtils;
 import com.rolvatech.cgc.utils.PrefUtils;
+import com.rolvatech.cgc.utils.UtilTransformer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -97,7 +98,13 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.child_details, container, false);
         Bundle bundle = getArguments();
-        child = (Child) bundle.getSerializable("child");
+        if(null!=bundle) {
+            child = (Child) bundle.getSerializable("child");
+        }else{
+            child=new Child();
+            child.setId(PrefUtils.getLongPreference(getContext(), PrefUtils.CHILD_ID,0));
+        }
+        getChildDetails(child);
         edtName = root.findViewById(R.id.edtName);
         edtAge = root.findViewById(R.id.edtAge);
         awesomeValidation.addValidation(edtAge, Range.closed(0, 60), "Age should be in 0 to 60");
@@ -120,7 +127,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
             btnDeAssignStaff.setText("Assign Staff");
         }
         child_image = root.findViewById(R.id.child_image);
-        getChildDetails(child);
+
         btnDeactivateChild = root.findViewById(R.id.btnDeactivateChild);
         btnUpdateChild = root.findViewById(R.id.btnUpdateChild);
 
@@ -189,15 +196,12 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                     edtContactNo.setText(String.valueOf(userDTO.getContact()));
                     edtOccupation.setText(String.valueOf(userDTO.getOccupation()));
                     edtTimeSlot.setText(String.valueOf(userDTO.getTimeSlot()));
+                    UtilTransformer.transformUserDtoToChild(userDTO,child);
                     if(null!=userDTO.getProfileImage()) {
                         String profileImage = userDTO.getProfileImage();
-
-
                         if(profileImage != null) {
                             String[] images = profileImage.split(",");
-
                             if(images.length > 0){
-
                                 String base64Image = images[images.length - 1];
                                 byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
                                 Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
@@ -241,7 +245,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
             user.setParentName(edtParentName.getText().toString());
             user.setProfileImage(profileImage != null ? profileImage : child.getProfileImage());
             user.setTimeSlot(edtTimeSlot.getText().toString());
-            user.setAboutMe(user.getAboutMe());
+            user.setAboutMe(child.getAboutMe());
             user.setId(child.getId());
 
             new APIClient(getActivity()).getApi().updateProfile("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), user)

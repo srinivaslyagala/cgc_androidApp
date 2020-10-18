@@ -25,6 +25,16 @@ public class Child implements Serializable {
 
     private String timeSlot;
 
+    public String getAboutMe() {
+        return aboutMe;
+    }
+
+    public void setAboutMe(String aboutMe) {
+        this.aboutMe = aboutMe;
+    }
+
+    private String aboutMe;
+
     private StaffDTO staff;
 
     public Long getId() {
