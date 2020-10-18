@@ -1,11 +1,7 @@
 package com.rolvatech.cgc.dataobjects;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-
-
 import java.io.Serializable;
-import java.util.Date;
+
 
 public class SubTaskDTO implements Serializable {
 

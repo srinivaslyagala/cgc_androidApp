@@ -15,6 +15,7 @@ import com.rolvatech.cgc.dataobjects.Stastics;
 import com.rolvatech.cgc.dataobjects.SubTaskDTO;
 import com.rolvatech.cgc.dataobjects.TaskDTO;
 import com.rolvatech.cgc.dataobjects.UserDTO;
+import com.rolvatech.cgc.model.UserDetailsResponse;
 import com.rolvatech.cgc.utils.Constants;
 
 import org.json.JSONObject;
@@ -155,7 +156,7 @@ public class APIClient {
         Call<UserDTO> getUserDetailsById(@Header("Authorization") String accessToken, @Path("userId") Long userId);
 
         @GET("user/deactivateUser/{userId}")
-        Call<UserDTO> deactivateUser(@Header("Authorization")String accesToken,@Path("userId") Long userId);
+        Call<UserDTO> deactivateUser(@Header("Authorization") String accesToken, @Path("userId") Long userId);
 
         @GET("user/getStatistics")
         Call<JsonObject> getStatistics(@Header("Authorization") String accessToken);
@@ -164,12 +165,13 @@ public class APIClient {
         Call<List<Child>> getChildListForStaff(@Header("Authorization") String accessToken, @Path("staffId") Long staffId);
 
         @GET("areaTask/getChildTasksByArea/{childId}")
-        Call<List<AreaTaskDTO>> getChildTasksByArea(@Header("Authorization") String accessToken,@Path("childId") Long childId);
+        Call<List<AreaTaskDTO>> getChildTasksByArea(@Header("Authorization") String accessToken, @Path("childId") Long childId);
 
         @GET("areaTask/getTasksByArea/{areaId}")
-        Call<List<TaskDTO>> getTasksforArea(@Header("Authorization") String accessToken,@Path("areaId") Long areaId);
-        @GET ("user/getChildReport/{userId}")
-        Call<Map<String,Object>> getChildReportDetails(@Header("Authorization") String accessToken,@Path("userId") Long childId);
+        Call<List<TaskDTO>> getTasksforArea(@Header("Authorization") String accessToken, @Path("areaId") Long areaId);
+
+        @GET("user/getChildReport/{userId}")
+        Call<UserDetailsResponse> getChildReportDetails(@Header("Authorization") String accessToken, @Path("userId") Long childId);
     }
 
 }

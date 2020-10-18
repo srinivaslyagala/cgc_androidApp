@@ -29,6 +29,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.bumptech.glide.Glide;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.rolvatech.cgc.APIClient;
 import com.rolvatech.cgc.R;
@@ -38,6 +40,7 @@ import com.rolvatech.cgc.dataobjects.Child;
 import com.rolvatech.cgc.dataobjects.StaffDTO;
 import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.AlertDialogManager;
+import com.rolvatech.cgc.utils.FileUtils;
 import com.rolvatech.cgc.utils.PrefUtils;
 
 import org.json.JSONException;
@@ -58,6 +61,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rolvatech.cgc.utils.Constants.REQUEST_IMAGE_CODE;
 
 public class StaffDetailsFragment extends Fragment {
     TextInputEditText edtMobile, edtlastName, edtFirstName, edtEmail, edtPassword;
@@ -144,23 +148,35 @@ public class StaffDetailsFragment extends Fragment {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if(response.code() == 200){
-                    UserDTO staffDetails=response.body();
-                    edtEmail.setText(staffDetails.getUserName());
-                    edtEmail.setEnabled(false);
-                    edtMobile.setText(staffDetails.getContact());
-                    edtFirstName.setText(staffDetails.getFirstName());
-                    edtlastName.setText(staffDetails.getLastName());
-                    String profileImage=staffDetails.getProfileImage();
-                    String base64Image = profileImage.split(",")[1];
-                    byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    staff_image.setImageBitmap(decodedByte);
-                    staff_image.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            selectImage();
+                    try {
+                        UserDTO staffDetails = response.body();
+                        edtEmail.setText(staffDetails.getUserName());
+                        edtEmail.setEnabled(false);
+                        edtMobile.setText(staffDetails.getContact());
+                        edtFirstName.setText(staffDetails.getFirstName());
+                        edtlastName.setText(staffDetails.getLastName());
+                        String profileImage = staffDetails.getProfileImage();
+                        if(profileImage != null) {
+                            String[] images = profileImage.split(",");
+
+                            if(images.length > 0){
+
+                                String base64Image = images[images.length - 1];
+                                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                staff_image.setImageBitmap(decodedByte);
+                            }
                         }
-                    });
+                        staff_image.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //selectImage();
+                                showImgePicker();
+                            }
+                        });
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }else{
 
                 }
@@ -331,8 +347,30 @@ public class StaffDetailsFragment extends Fragment {
                 profileImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 // Log.w("path of image from gallery......******************.........", picturePath+"");
                 staff_image.setImageBitmap(thumbnail);
+
+            } else if (requestCode == REQUEST_IMAGE_CODE) {
+                //Image Uri will not be null for RESULT_OK
+
+                if (data != null) {
+
+                    File file = ImagePicker.Companion.getFile(data);
+                    if (file != null) {
+                        Glide.with(getActivity()).load(file.getAbsolutePath()).error(R.mipmap.ic_launcher).into(staff_image);
+                        profileImage = FileUtils.generateImageData(file);
+                    }
+                }
             }
         }
     }
 
+    private void showImgePicker() {
+        String[] mimeTypes = {"image/png", "image/jpg", "image/jpeg"};
+
+        ImagePicker.Companion.with(this)
+                .galleryMimeTypes(mimeTypes)
+                .crop()                    //Crop image(Optional), Check Customization for more option
+                .compress(512)            //Final image size will be less than 1 MB(Optional)
+                .maxResultSize(500, 500)    //Final image resolution will be less than 1080 x 1080(Optional)
+                .start(REQUEST_IMAGE_CODE);
+    }
 }

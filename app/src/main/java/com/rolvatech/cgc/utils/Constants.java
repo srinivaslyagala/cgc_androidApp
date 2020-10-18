@@ -83,4 +83,8 @@ public class Constants {
     public static final String LOG_FOLDER = "ifl-logs";
 
     public static final int CAMERA_REQUEST_CODE = 700;
+
+
+    public static final int REQUEST_IMAGE_CODE = 1001;
+
 }

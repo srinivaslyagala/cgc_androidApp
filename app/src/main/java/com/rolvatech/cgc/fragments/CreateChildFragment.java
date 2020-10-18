@@ -1,8 +1,9 @@
 package com.rolvatech.cgc.fragments;
 
 import android.app.AlertDialog;
-import android.app.TimePickerDialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
@@ -22,14 +22,16 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.bumptech.glide.Glide;
 import com.chinalwb.are.AREditText;
 import com.chinalwb.are.styles.toolbar.ARE_ToolbarDefault;
 import com.chinalwb.are.styles.toolbar.IARE_Toolbar;
@@ -54,6 +56,7 @@ import com.chinalwb.are.styles.toolitems.ARE_ToolItem_Superscript;
 import com.chinalwb.are.styles.toolitems.ARE_ToolItem_Underline;
 import com.chinalwb.are.styles.toolitems.ARE_ToolItem_Video;
 import com.chinalwb.are.styles.toolitems.IARE_ToolItem;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.common.collect.Range;
 import com.rolvatech.cgc.APIClient;
@@ -61,10 +64,8 @@ import com.rolvatech.cgc.R;
 import com.rolvatech.cgc.dataobjects.InstituteDTO;
 import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.AlertDialogManager;
+import com.rolvatech.cgc.utils.FileUtils;
 import com.rolvatech.cgc.utils.PrefUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -80,6 +81,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rolvatech.cgc.utils.Constants.REQUEST_IMAGE_CODE;
 
 public class CreateChildFragment extends Fragment {
     TextInputEditText edtName, edtAge, edtParentName, edtParentEmail, edtContactNo, edtOccupation, edtTimeSlot;
@@ -92,6 +94,8 @@ public class CreateChildFragment extends Fragment {
     private boolean scrollerAtEnd;
     private AwesomeValidation awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
     ProgressDialog progressDialog;
+
+    private Context mContext ;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -143,7 +147,8 @@ public class CreateChildFragment extends Fragment {
         child_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectImage();
+               // selectImage();
+                showImgePicker();
             }
         });
         btnRegisterChild.setOnClickListener(new View.OnClickListener() {
@@ -152,7 +157,17 @@ public class CreateChildFragment extends Fragment {
                 registerChild();
             }
         });
+
+        //initializePix();
+
         return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mContext = getActivity();
     }
 
     public void registerChild() {
@@ -288,6 +303,17 @@ public class CreateChildFragment extends Fragment {
                 profileImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 // Log.w("path of image from gallery......******************.........", picturePath+"");
                 child_image.setImageBitmap(thumbnail);
+            }else if (requestCode == REQUEST_IMAGE_CODE) {
+                //Image Uri will not be null for RESULT_OK
+
+                if (data != null) {
+
+                    File file = ImagePicker.Companion.getFile(data);
+                    if (file != null) {
+                        Glide.with(getActivity()).load(file.getAbsolutePath()).error(R.mipmap.ic_launcher).into(child_image);
+                        profileImage = FileUtils.generateImageData(file);
+                    }
+                }
             }
         }
     }
@@ -374,5 +400,50 @@ public class CreateChildFragment extends Fragment {
                 }
             }
         });
+    }
+
+   /* private static int PIX_REQUEST_CODE = 1001 ;
+    private Options options ;
+    private ArrayList<String> selectedUrls = new ArrayList<>();
+    private void initializePix(){
+        options = Options.init()
+                .setRequestCode(PIX_REQUEST_CODE)                                           //Request code for activity results
+                .setCount(1)                                                   //Number of images to restict selection count
+                .setFrontfacing(false)                                         //Front Facing camera on start
+                .setPreSelectedUrls(selectedUrls)                               //Pre selected Image Urls
+                .setSpanCount(4)                                               //Span count for gallery min 1 & max 5
+                .setExcludeVideos(false)                                       //Option to exclude videos
+                .setVideoDurationLimitinSeconds(30)                            //Duration for video recording
+                .setScreenOrientation(Options.SCREEN_ORIENTATION_PORTRAIT)     //Orientaion
+                .setPath("/pix/images");
+    }
+    private void pickImage(){
+        Pix.start(getActivity(), options);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PermUtil.REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pickImage();
+                } else {
+                    Toast.makeText(mContext, "Approve permissions to open Pix ImagePicker", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+        }
+    }*/
+
+    private void showImgePicker() {
+        String[] mimeTypes = {"image/png", "image/jpg", "image/jpeg"};
+
+        ImagePicker.Companion.with(this)
+                .galleryMimeTypes(mimeTypes)
+                .crop()                    //Crop image(Optional), Check Customization for more option
+                .compress(512)            //Final image size will be less than 1 MB(Optional)
+                .maxResultSize(500, 500)    //Final image resolution will be less than 1080 x 1080(Optional)
+                .start(REQUEST_IMAGE_CODE);
     }
 }

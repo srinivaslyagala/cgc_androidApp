@@ -157,7 +157,7 @@ public class ChildTab1 extends Fragment {
         mToolbar.addToolbarItem(video);
         mToolbar.addToolbarItem(at);
 
-        edtAddress.setToolbar(mToolbar);
+      //  edtAddress.setToolbar(mToolbar);
         initToolbarArrow(root);
     }
 

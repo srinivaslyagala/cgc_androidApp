@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,24 +27,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.bumptech.glide.Glide;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.common.collect.Range;
 import com.rolvatech.cgc.APIClient;
 import com.rolvatech.cgc.R;
-import com.rolvatech.cgc.RecyclerTouchListener;
-import com.rolvatech.cgc.adapters.ChildListAdapter;
 import com.rolvatech.cgc.adapters.Pager;
-import com.rolvatech.cgc.adapters.StaffListAdapter;
 import com.rolvatech.cgc.dataobjects.AreaDTO;
 import com.rolvatech.cgc.dataobjects.AreaTaskDTO;
 import com.rolvatech.cgc.dataobjects.Child;
@@ -52,10 +48,8 @@ import com.rolvatech.cgc.dataobjects.StaffDTO;
 import com.rolvatech.cgc.dataobjects.TaskDTO;
 import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.AlertDialogManager;
+import com.rolvatech.cgc.utils.FileUtils;
 import com.rolvatech.cgc.utils.PrefUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,7 +60,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -77,6 +70,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rolvatech.cgc.utils.Constants.REQUEST_IMAGE_CODE;
 
 public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSelectedListener {
 
@@ -172,6 +166,12 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                 deactivateChild();
             }
         });
+        child_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showImgePicker();
+            }
+        });
         return root;
     }
 
@@ -191,10 +191,19 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                     edtTimeSlot.setText(String.valueOf(userDTO.getTimeSlot()));
                     if(null!=userDTO.getProfileImage()) {
                         String profileImage = userDTO.getProfileImage();
-                        String base64Image = profileImage.split(",")[1];
-                        byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                        child_image.setImageBitmap(decodedByte);
+
+
+                        if(profileImage != null) {
+                            String[] images = profileImage.split(",");
+
+                            if(images.length > 0){
+
+                                String base64Image = images[images.length - 1];
+                                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                child_image.setImageBitmap(decodedByte);
+                            }
+                        }
                     }
                     if (child.getStaffAssigned()) {
                         edtStaffNameAssigned.setText(userDTO.getStaff().getFirstname() + " " + userDTO.getStaff().getLastName());
@@ -455,6 +464,17 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                 profileImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 // Log.w("path of image from gallery......******************.........", picturePath+"");
                 child_image.setImageBitmap(thumbnail);
+            }else if (requestCode == REQUEST_IMAGE_CODE) {
+                //Image Uri will not be null for RESULT_OK
+
+                if (data != null) {
+
+                    File file = ImagePicker.Companion.getFile(data);
+                    if (file != null) {
+                        Glide.with(getActivity()).load(file.getAbsolutePath()).error(R.mipmap.ic_launcher).into(child_image);
+                        profileImage = FileUtils.generateImageData(file);
+                    }
+                }
             }
         }
     }
@@ -680,5 +700,17 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
             public void onFailure(Call<List<AreaTaskDTO>> call, Throwable t) {}
         });
     }
+
+    private void showImgePicker() {
+        String[] mimeTypes = {"image/png", "image/jpg", "image/jpeg"};
+
+        ImagePicker.Companion.with(this)
+                .galleryMimeTypes(mimeTypes)
+                .crop()                    //Crop image(Optional), Check Customization for more option
+                .compress(512)            //Final image size will be less than 1 MB(Optional)
+                .maxResultSize(500, 500)    //Final image resolution will be less than 1080 x 1080(Optional)
+                .start(REQUEST_IMAGE_CODE);
+    }
+
 
 }

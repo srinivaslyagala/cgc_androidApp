@@ -1,18 +1,30 @@
 package com.rolvatech.cgc.utils;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
+
+import androidx.core.content.FileProvider;
+import androidx.multidex.BuildConfig;
+
+import com.rolvatech.cgc.R;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,6 +33,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.List;
+import java.util.Objects;
 
 public class FileUtils {
     static int count = 0;
@@ -296,4 +310,127 @@ public class FileUtils {
         }
     }
 
+
+    public static String generateImageData(File file)  {
+
+        try {
+
+            Bitmap bitmap;
+            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(),
+                    bitmapOptions);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            file.delete();
+            return  Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null ;
+    }
+
+    /**
+     * Get Path of App which contains Files
+     *
+     * @return path of root dir
+     */
+    public static File getAppPath(Context context) {
+        File dir = new File(android.os.Environment.getExternalStorageDirectory()
+                + File.separator
+                + context.getResources().getString(R.string.app_name)
+                + File.separator);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        return dir;
+    }
+
+    public static void openFile(Context context, File url) throws ActivityNotFoundException,
+            IOException {
+
+        //Uri uri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".fileprovider", url);
+
+        Uri uri =  FileProvider.getUriForFile(Objects.requireNonNull(context.getApplicationContext()),
+                "com.rolvatech.cgc" + ".provider", url);
+
+        String urlString = url.toString().toLowerCase();
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        /**
+         * Security
+         */
+        List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            context.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+
+        // Check what kind of file you are trying to open, by comparing the url with extensions.
+        // When the if condition is matched, plugin sets the correct intent (mime) type,
+        // so Android knew what application to use to open the file
+        if (urlString.toLowerCase().toLowerCase().contains(".doc")
+                || urlString.toLowerCase().contains(".docx")) {
+            // Word document
+            intent.setDataAndType(uri, "application/msword");
+        } else if (urlString.toLowerCase().contains(".pdf")) {
+            // PDF file
+            intent.setDataAndType(uri, "application/pdf");
+        } else if (urlString.toLowerCase().contains(".ppt")
+                || urlString.toLowerCase().contains(".pptx")) {
+            // Powerpoint file
+            intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+        } else if (urlString.toLowerCase().contains(".xls")
+                || urlString.toLowerCase().contains(".xlsx")) {
+            // Excel file
+            intent.setDataAndType(uri, "application/vnd.ms-excel");
+        } else if (urlString.toLowerCase().contains(".zip")
+                || urlString.toLowerCase().contains(".rar")) {
+            // ZIP file
+            intent.setDataAndType(uri, "application/trap");
+        } else if (urlString.toLowerCase().contains(".rtf")) {
+            // RTF file
+            intent.setDataAndType(uri, "application/rtf");
+        } else if (urlString.toLowerCase().contains(".wav")
+                || urlString.toLowerCase().contains(".mp3")) {
+            // WAV/MP3 audio file
+            intent.setDataAndType(uri, "audio/*");
+        } else if (urlString.toLowerCase().contains(".gif")) {
+            // GIF file
+            intent.setDataAndType(uri, "image/gif");
+        } else if (urlString.toLowerCase().contains(".jpg")
+                || urlString.toLowerCase().contains(".jpeg")
+                || urlString.toLowerCase().contains(".png")) {
+            // JPG file
+            intent.setDataAndType(uri, "image/jpeg");
+        } else if (urlString.toLowerCase().contains(".txt")) {
+            // Text file
+            intent.setDataAndType(uri, "text/plain");
+        } else if (urlString.toLowerCase().contains(".3gp")
+                || urlString.toLowerCase().contains(".mpg")
+                || urlString.toLowerCase().contains(".mpeg")
+                || urlString.toLowerCase().contains(".mpe")
+                || urlString.toLowerCase().contains(".mp4")
+                || urlString.toLowerCase().contains(".avi")) {
+            // Video files
+            intent.setDataAndType(uri, "video/*");
+        } else {
+            // if you want you can also define the intent type for any other file
+
+            // additionally use else clause below, to manage other unknown extensions
+            // in this case, Android will show all applications installed on the device
+            // so you can choose which application to use
+            intent.setDataAndType(uri, "*/*");
+        }
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    public static void showMessage(Context context, String message){
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+    }
 }

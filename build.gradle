@@ -10,9 +10,11 @@ buildscript {
             url 'https://maven.google.com/'
             name 'Google'
         }
+        maven { url 'https://jitpack.io' }
+
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -38,9 +40,9 @@ ext {
     // Sdk and tools
     // Support library and architecture components support minSdk 16 and above.
     minSdkVersion = 16
-    targetSdkVersion = 26
-    compileSdkVersion = 26
-    buildToolsVersion = '26.0.3'
+    targetSdkVersion = 30
+    compileSdkVersion = 30
+    buildToolsVersion = '30.0.0'
     supportLibraryVersion = '26.1.0'
     junitVersion = '4.12'
     archRoomVersion = "1.0.0-alpha3"
