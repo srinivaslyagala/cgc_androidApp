@@ -19,7 +19,7 @@ public class Child implements Serializable {
 
     private String age;
 
-    private Boolean staffAssigned;
+    private boolean staffAssigned;
 
     private String profileImage;
 

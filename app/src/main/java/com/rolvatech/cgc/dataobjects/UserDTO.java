@@ -37,7 +37,7 @@ public class UserDTO implements Serializable, Cloneable {
 
     private String profileImage;
 
-    private Boolean staffAssigned;
+    private boolean staffAssigned;
 
     public String getFirstName() {
         return firstName;

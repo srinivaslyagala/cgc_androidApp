@@ -104,7 +104,6 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
             child=new Child();
             child.setId(PrefUtils.getLongPreference(getContext(), PrefUtils.CHILD_ID,0));
         }
-        getChildDetails(child);
         edtName = root.findViewById(R.id.edtName);
         edtAge = root.findViewById(R.id.edtAge);
         awesomeValidation.addValidation(edtAge, Range.closed(0, 60), "Age should be in 0 to 60");
@@ -120,12 +119,13 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
         awesomeValidation.addValidation(edtTimeSlot, "^[0-9-:\\s]{0,15}", "Time slot should be in 10:00 - 11:00");
         edtStaffNameAssigned = root.findViewById(R.id.edtStaffNameAssigned);
         btnDeAssignStaff = root.findViewById(R.id.btnDeAssignStaff);
-        if (child.getStaffAssigned()) {
-            edtStaffNameAssigned.setText(child.getStaff().getFirstname() + " " + child.getStaff().getLastName());
-            btnDeAssignStaff.setText("De-assign Staff");
-        } else {
-            btnDeAssignStaff.setText("Assign Staff");
-        }
+        getChildDetails(child);
+//        if (child.getStaffAssigned()) {
+//            edtStaffNameAssigned.setText(child.getStaff().getFirstname() + " " + child.getStaff().getLastName());
+//            btnDeAssignStaff.setText("De-assign Staff");
+//        } else {
+//            btnDeAssignStaff.setText("Assign Staff");
+//        }
         child_image = root.findViewById(R.id.child_image);
 
         btnDeactivateChild = root.findViewById(R.id.btnDeactivateChild);
