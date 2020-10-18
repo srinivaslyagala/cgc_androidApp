@@ -91,8 +91,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         CircleImageView profileImage = headerView.findViewById(R.id.profile_image);
         Bitmap bm = StringToBitMap(PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.PROFILE_IMAGE));
         profileImage.setImageBitmap(bm);
-        Log.e("email", PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.EMAIL));
-        email.setText(PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.EMAIL));
+        Log.e("email", PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.USER_NAME));
+        email.setText(PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.USER_NAME));
         name.setText(PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.FIRST_NAME) + " " + PrefUtils.getStringPreference(DashboardActivity.this, PrefUtils.LAST_NAME));
 
         fragment = new HomeFragment();
