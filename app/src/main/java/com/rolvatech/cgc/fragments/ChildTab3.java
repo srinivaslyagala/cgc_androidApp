@@ -5,8 +5,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import android.widget.EditText;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.itextpdf.text.BaseColor;
@@ -24,6 +28,7 @@ import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.rolvatech.cgc.APIClient;
+import com.rolvatech.cgc.BuildConfig;
 import com.rolvatech.cgc.R;
 import com.rolvatech.cgc.model.UserDetailsResponse;
 import com.rolvatech.cgc.utils.FileUtils;
@@ -31,6 +36,7 @@ import com.rolvatech.cgc.utils.PdfGenerator;
 import com.rolvatech.cgc.utils.PrefUtils;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.Random;
 
 import dmax.dialog.SpotsDialog;
@@ -240,8 +246,33 @@ public class ChildTab3 extends Fragment {
     private void showGeneratedPdf(File file) {
         try {
 
-            FileUtils.openFile(getActivity(), file);
+            //FileUtils.openFile(getActivity(), file);
 
+            try {
+                // create new Intent
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+
+                // set flag to give temporary permission to external app to use your FileProvider
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                // generate URI, I defined authority as the application ID in the Manifest, the last param is file I want to open
+                //Uri uri = FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID+".provider", file);
+
+                Uri uri =  FileProvider.getUriForFile(requireActivity(),
+                        BuildConfig.APPLICATION_ID + ".provider", file);
+
+                // I am opening a PDF file so I give it a valid MIME type
+                intent.setDataAndType(uri, "application/pdf");
+
+                // validate that the device can open your File!
+                PackageManager pm = getActivity().getPackageManager();
+                if (intent.resolveActivity(pm) != null) {
+                    startActivity(intent);
+                }
+            } catch (IllegalArgumentException e) {
+                Log.e("File Selector",
+                        "The selected file can't be shared: " + file.toString());
+            }
 
         } catch (ActivityNotFoundException ex) {
             showMessage(getActivity(), "ActivityNotFoundException");

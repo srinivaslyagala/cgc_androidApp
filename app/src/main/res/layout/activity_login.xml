@@ -39,6 +39,7 @@
             android:singleLine="true"
             android:textSize="@dimen/large_text_size"
             tools:ignore="TextFields"
+            android:text="srinivaslayagala@gmail.com"
             />
 
 
@@ -55,6 +56,7 @@
             android:singleLine="true"
             android:textSize="@dimen/large_text_size"
             tools:ignore="Autofill"
+            android:text="password"
             />
 
 

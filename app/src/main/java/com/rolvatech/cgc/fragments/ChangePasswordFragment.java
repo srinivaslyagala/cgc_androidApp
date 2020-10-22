@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.rolvatech.cgc.APIClient;
 import com.rolvatech.cgc.R;
+import com.rolvatech.cgc.dataobjects.JwtRequest;
 import com.rolvatech.cgc.utils.AlertDialogManager;
 import com.rolvatech.cgc.utils.PrefUtils;
 
@@ -27,7 +29,7 @@ public class ChangePasswordFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     TextInputEditText edtOldPassword, edtNewPassword, edtCnfPassword;
-
+    Button  btnSubmit;
     AlertDialogManager alertDialogManager = new AlertDialogManager();
     Toolbar toolbar;
     public ChangePasswordFragment() {
@@ -42,23 +44,27 @@ public class ChangePasswordFragment extends Fragment {
         edtOldPassword = root.findViewById(R.id.edtOldPassword);
         edtNewPassword = root.findViewById(R.id.edtNewPassword);
         edtCnfPassword = root.findViewById(R.id.edtCnfPassword);
-        if (!edtOldPassword.getText().toString().equals(PrefUtils.getStringPreference(getActivity(), PrefUtils.PASSWORD))) {
-            alertDialogManager.showToast(getActivity(), "Enter correct old password");
-        } else if (!edtOldPassword.getText().toString().equals(edtCnfPassword.getText().toString())) {
-            alertDialogManager.showToast(getActivity(), "new and confirm password not matched");
-        } else {
-            changePassword();
-        }
-
+        btnSubmit=root.findViewById(R.id.btnSubmit);
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changePassword();
+            }
+        });
         return root;
     }
 
     public void changePassword() {
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("password", edtNewPassword.getText().toString());
-            jsonObject.put("username", PrefUtils.getStringPreference(getActivity(), PrefUtils.KEY_USER));
-            new APIClient(getActivity()).getApi().updatePassword("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), jsonObject).enqueue(new Callback<JSONObject>() {
+        if (edtOldPassword.getText().toString().equals(edtNewPassword.getText().toString())) {
+            alertDialogManager.showToast(getActivity(), "New Password should not be same as Old Password");
+        }
+        if (!edtNewPassword.getText().toString().equals(edtCnfPassword.getText().toString())) {
+            alertDialogManager.showToast(getActivity(), "new and confirm password not matched");
+        } else {
+            JwtRequest request=new JwtRequest();
+            request.setPassword(edtNewPassword.getText().toString());
+            request.setUsername(PrefUtils.getStringPreference(getActivity(), PrefUtils.KEY_USER));
+            new APIClient(getActivity()).getApi().updatePassword("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), request).enqueue(new Callback<JSONObject>() {
                 @Override
                 public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
                     if (response.isSuccessful() || response.code() == 200) {
@@ -73,8 +79,7 @@ public class ChangePasswordFragment extends Fragment {
 
                 }
             });
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
+    }
     }
 }

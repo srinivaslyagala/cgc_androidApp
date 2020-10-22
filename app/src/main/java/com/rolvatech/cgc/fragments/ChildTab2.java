@@ -15,23 +15,16 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.rolvatech.cgc.APIClient;
 import com.rolvatech.cgc.R;
-import com.rolvatech.cgc.RecyclerTouchListener;
-import com.rolvatech.cgc.adapters.AreaListAdapter;
 import com.rolvatech.cgc.adapters.CustomExpandableListAdapter;
 import com.rolvatech.cgc.dataobjects.AreaDTO;
 import com.rolvatech.cgc.dataobjects.AreaTaskDTO;
-import com.rolvatech.cgc.dataobjects.Child;
 import com.rolvatech.cgc.dataobjects.TaskDTO;
 import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.PrefUtils;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;

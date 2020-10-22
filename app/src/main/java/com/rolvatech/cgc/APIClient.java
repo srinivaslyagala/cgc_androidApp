@@ -10,6 +10,7 @@ import com.rolvatech.cgc.dataobjects.AreaTaskDTO;
 import com.rolvatech.cgc.dataobjects.Child;
 import com.rolvatech.cgc.dataobjects.ChildTaskDTO;
 import com.rolvatech.cgc.dataobjects.InstituteDTO;
+import com.rolvatech.cgc.dataobjects.JwtRequest;
 import com.rolvatech.cgc.dataobjects.StaffDTO;
 import com.rolvatech.cgc.dataobjects.Stastics;
 import com.rolvatech.cgc.dataobjects.SubTaskDTO;
@@ -134,7 +135,7 @@ public class APIClient {
         Call<UserDTO> updateProfile(@Header("Authorization") String accessToken, @Body UserDTO user);
 
         @POST("user/updatePassword")
-        Call<JSONObject> updatePassword(@Header("Authorization") String accessToken, @Body JSONObject jsonObject);
+        Call<JSONObject> updatePassword(@Header("Authorization") String accessToken, @Body JwtRequest jsonObject);
 
         @POST("areaTask/updateArea")
         Call<JSONObject> updateArea(@Header("Authorization") String accessToken, @Body JSONObject jsonObject);
@@ -154,6 +155,9 @@ public class APIClient {
         //1
         @GET("user/getUser/{userId}")
         Call<UserDTO> getUserDetailsById(@Header("Authorization") String accessToken, @Path("userId") Long userId);
+
+        @GET("user/getUser/{userId}")
+        Call<UserDTO> getUserDetailsById(@Header("Authorization") String accessToken, @Path("userId") String userId);
 
         @GET("user/deactivateUser/{userId}")
         Call<UserDTO> deactivateUser(@Header("Authorization") String accesToken, @Path("userId") Long userId);

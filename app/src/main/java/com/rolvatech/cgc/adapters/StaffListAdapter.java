@@ -50,24 +50,15 @@ public class StaffListAdapter extends RecyclerView.Adapter<StaffListAdapter.View
     @Override
     public void onBindViewHolder(@NonNull StaffListAdapter.ViewHolder holder, int position) {
         UserDTO staffDTO = staffDTOArrayList.get(position);
-        new APIClient(holder.imageView.getContext()).getApi().getProfileImage("Bearer " + PrefUtils.getStringPreference(holder.imageView.getContext(), PrefUtils.TOKEN),""+staffDTO.getId()).enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                if(response.isSuccessful()){
-                    File sdcard = Environment.getDownloadCacheDirectory();
-                    String base64=response.body();
-                    String base64Image = base64.split(",")[1];
-                    Log.i("Image Async Download", "onResponse: Image String downloaded"+base64Image.length()+" file"+sdcard.getAbsolutePath()+"/cgc/images/"+staffDTO.getId()+".temp");
-                    FileUtils.writeFile(base64Image.getBytes(),sdcard.getAbsolutePath()+"/cgc/images/",staffDTO.getId()+".temp");
-                    byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    holder.imageView.setImageBitmap(decodedByte);
-                }
+        if(staffDTO.getProfileImage() != null) {
+            String[] images = staffDTO.getProfileImage().split(",");
+            if(images.length > 0){
+                String base64Image = images[images.length - 1];
+                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                holder.imageView.setImageBitmap(decodedByte);
             }
-            @Override
-            public void onFailure(Call<String> call, Throwable t) {
-            }
-        });
+        };
 //        if (staffDTO.getProfileImage() != null && !staffDTO.getProfileImage().equals(""))
 //            holder.imageView.setImageBitmap(FileUtils.StringToBitMap(staffDTO.getProfileImage()));
         holder.staffName.setText(staffDTO.getFirstName() + " " + staffDTO.getLastName());
