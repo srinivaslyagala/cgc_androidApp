@@ -32,6 +32,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public Object getChild(int listPosition, int expandedListPosition) {
         return this.expandableListDetail.get(this.expandableListTitle.get(listPosition))
+                .get(expandedListPosition).getTaskNumber()+" - "+this.expandableListDetail.get(this.expandableListTitle.get(listPosition))
                 .get(expandedListPosition).getTaskName();
     }
 

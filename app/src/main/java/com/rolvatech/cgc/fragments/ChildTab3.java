@@ -281,4 +281,23 @@ public class ChildTab3 extends Fragment {
             ex.printStackTrace();
         }
     }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog(String message) {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
+    }
 }

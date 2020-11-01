@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -95,16 +96,18 @@ public class AreaListFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                String areaName= textInput.getText().toString();
+               showDialog();
                new APIClient(getContext()).getApi().createArea("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),areaName).enqueue(new Callback<JSONObject>() {
                    @Override
                    public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                       hideDialog();
                        assert response.body()!=null;
                        Toast.makeText(getContext(),"Area Added Successfully",Toast.LENGTH_LONG);
                    }
 
                    @Override
                    public void onFailure(Call<JSONObject> call, Throwable t) {
-
+                        hideDialog();
                    }
                });
             }
@@ -120,10 +123,11 @@ public class AreaListFragment extends Fragment {
     }
 
     public void getAreas() {
-
+        showDialog();
         new APIClient(getActivity()).getApi().getAreas("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<AreaDTO>>() {
             @Override
             public void onResponse(Call<List<AreaDTO>> call, Response<List<AreaDTO>> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     areaDTOList = new ArrayList<>();
                     //  try {
@@ -177,8 +181,26 @@ public class AreaListFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<AreaDTO>> call, Throwable throwable) {
-
+                hideDialog();
             }
         });
+    }
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

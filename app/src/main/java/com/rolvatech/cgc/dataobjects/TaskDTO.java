@@ -11,6 +11,8 @@ public class TaskDTO implements Serializable {
 
     private String taskName;
 
+    private Long taskNumber;
+
     private Long userTaskId;
 
     private Integer noofLevels;
@@ -95,6 +97,13 @@ public class TaskDTO implements Serializable {
 
     public void setUserTaskId(Long userTaskId) {
         this.userTaskId = userTaskId;
+    }
+    public Long getTaskNumber() {
+        return taskNumber;
+    }
+
+    public void setTaskNumber(Long taskNumber) {
+        this.taskNumber = taskNumber;
     }
     @Override
     public String toString() {

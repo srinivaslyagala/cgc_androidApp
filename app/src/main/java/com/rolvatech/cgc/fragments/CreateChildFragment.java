@@ -76,6 +76,7 @@ import java.io.OutputStream;
 import java.util.Calendar;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -445,5 +446,24 @@ public class CreateChildFragment extends Fragment {
                 .compress(512)            //Final image size will be less than 1 MB(Optional)
                 .maxResultSize(500, 500)    //Final image resolution will be less than 1080 x 1080(Optional)
                 .start(REQUEST_IMAGE_CODE);
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

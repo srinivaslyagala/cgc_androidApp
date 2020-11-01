@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -71,14 +72,16 @@ public class ChildTab2 extends Fragment {
     }
 
     private void getAssignedTasks(Long childId) {
+        showDialog("Loading...");
         new APIClient(getActivity()).getApi().getChildTasksByArea("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), (childId)).enqueue(new Callback<List<AreaTaskDTO>>() {
             @Override
             public void onResponse(Call<List<AreaTaskDTO>> call, Response<List<AreaTaskDTO>> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     List<AreaTaskDTO> areaDTOS = response.body().subList(0, response.body().size());
                     expandableListDetail = new HashMap<>();
                     for (int i = 0; i < areaDTOS.size(); i++) {
-                        expandableListDetail.put(areaDTOS.get(i).getName(), areaDTOS.get(i).getTasks());
+                        expandableListDetail.put(areaDTOS.get(i).getAreaNumber()+" - "+areaDTOS.get(i).getName(), areaDTOS.get(i).getTasks());
                     }
                     expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
                     expandableListAdapter = new CustomExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);
@@ -137,15 +140,17 @@ public class ChildTab2 extends Fragment {
 
             @Override
             public void onFailure(Call<List<AreaTaskDTO>> call, Throwable throwable) {
-
+                hideDialog();
             }
         });
     }
 
     private void getChildDetails(Long childId) {
+        showDialog("Loading..");
         new APIClient(getActivity()).getApi().getUserDetailsById("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), (childId)).enqueue(new Callback<UserDTO>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     userDTO = response.body();
 
@@ -156,15 +161,17 @@ public class ChildTab2 extends Fragment {
 
             @Override
             public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                hideDialog();
             }
         });
     }
 
     public void getAreas() {
+        showDialog("Loading..");
         new APIClient(getActivity()).getApi().getAllTasksByAreaOrder("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<AreaTaskDTO>>() {
             @Override
             public void onResponse(Call<List<AreaTaskDTO>> call, Response<List<AreaTaskDTO>> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     List<AreaTaskDTO> areaDTOS = response.body().subList(0, response.body().size());
                     expandableListDetail = new HashMap<>();
@@ -215,7 +222,7 @@ public class ChildTab2 extends Fragment {
 
             @Override
             public void onFailure(Call<List<AreaTaskDTO>> call, Throwable throwable) {
-
+                hideDialog();
             }
         });
     }
@@ -226,9 +233,11 @@ public class ChildTab2 extends Fragment {
         AlertDialog.Builder areaListDialog = new AlertDialog.Builder(getContext());
         areaListDialog.setTitle("Select Area");
         final ArrayAdapter<String> areaListAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_singlechoice);
+        showDialog("Loading..");
         new APIClient(getActivity()).getApi().getAreas("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<AreaDTO>>() {
             @Override
             public void onResponse(Call<List<AreaDTO>> call, Response<List<AreaDTO>> response) {
+                hideDialog();
                 if(response.isSuccessful()){
                     assert response.body()!=null;
                     areaDtoList = response.body().subList(0,response.body().size());
@@ -238,7 +247,7 @@ public class ChildTab2 extends Fragment {
                 }else{ }
             }
             @Override
-            public void onFailure(Call<List<AreaDTO>> call, Throwable t) { }
+            public void onFailure(Call<List<AreaDTO>> call, Throwable t) { hideDialog(); }
         });
         areaListDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -256,9 +265,11 @@ public class ChildTab2 extends Fragment {
                 taskListDialog.setTitle("Select Task");
                 ArrayList<String> taskList=new ArrayList<>();
                 ArrayList<Boolean> checkedTasks=new ArrayList<Boolean>();
+                showDialog("Loading..");
                 new APIClient(getActivity()).getApi().getTasksforArea("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),areaId).enqueue(new Callback<List<TaskDTO>>() {
                     @Override
                     public void onResponse(Call<List<TaskDTO>> call, Response<List<TaskDTO>> response) {
+                        hideDialog();
                         if(response.isSuccessful()){
                             assert response.body()!=null;
                             taskListDto = response.body().subList(0, response.body().size());
@@ -280,7 +291,7 @@ public class ChildTab2 extends Fragment {
 
                     @Override
                     public void onFailure(Call<List<TaskDTO>> call, Throwable t) {
-
+                        hideDialog();
                     }
                 });
                 taskListDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -321,5 +332,24 @@ public class ChildTab2 extends Fragment {
             }
 
         });
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog(String message) {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

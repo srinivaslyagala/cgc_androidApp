@@ -1,5 +1,6 @@
 package com.rolvatech.cgc.fragments;
 
+import android.app.AlertDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +29,7 @@ import com.rolvatech.cgc.utils.PrefUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -73,10 +75,11 @@ public class ChildListFragment extends Fragment {
     }
 
     public void getChildren() {
-
+        showDialog("Loading....");
         new APIClient(getActivity()).getApi().getChild("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<Child>>() {
             @Override
             public void onResponse(Call<List<Child>> call, Response<List<Child>> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     childList = new ArrayList<>();
                     //  try {
@@ -122,8 +125,27 @@ public class ChildListFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Child>> call, Throwable t) {
+                hideDialog();
                 Log.e("error", t.getMessage());
             }
         });
+    }
+    AlertDialog spotsDialog;
+
+    private void showDialog(String message) {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.rolvatech.cgc.fragments;
 
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -93,9 +95,11 @@ public class ChildTab1 extends Fragment {
     }
 
     private void getChildDetails(Long childId) {
+        showDialog("Loading...");
         new APIClient(getActivity()).getApi().getUserDetailsById("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),(childId)).enqueue(new Callback<UserDTO>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                hideDialog();
                 if(response.code() == 200){
                     child = response.body();
                     if(null!=child.getAboutMe()){
@@ -108,7 +112,7 @@ public class ChildTab1 extends Fragment {
 
             @Override
             public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                hideDialog();
             }
         });
     }
@@ -195,5 +199,24 @@ public class ChildTab1 extends Fragment {
                 }
             }
         });
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog(String message) {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

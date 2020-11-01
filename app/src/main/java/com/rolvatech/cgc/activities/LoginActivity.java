@@ -1,6 +1,7 @@
 package com.rolvatech.cgc.activities;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import dmax.dialog.SpotsDialog;
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -110,11 +112,12 @@ public class LoginActivity extends AppCompatActivity {
                             model.setBody(jsonObject.toString());
                             model.setUrl(com.rolvatech.cgc.BuildConfig.SERVER_URL
                                     + Constants.API_LOGIN);
-
+showDialog();
                             ApiRequest.getInstance().setRequestModel(model)
                                     .callApi(new ApiResponseListener() {
                                         @Override
                                         public void onResponse(Call call, final Response response) {
+                                            hideDialog();
                                             if (response.isSuccessful() && response.code() == 200) {
                                                 try {
                                                     assert response.body() != null;
@@ -228,6 +231,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onFailure(Call call, IOException e) {
+                                            hideDialog();
                                             Log.e("error", Objects.requireNonNull(e.getMessage()));
                                             validateOffline();
                                         }
@@ -352,6 +356,25 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.edtPassword);
         forgot_password = findViewById(R.id.forgot_password);
         sign_up = findViewById(R.id.sign_up);
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(LoginActivity.this)
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 
 

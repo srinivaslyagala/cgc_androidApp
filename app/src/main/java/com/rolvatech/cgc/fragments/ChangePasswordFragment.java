@@ -1,5 +1,6 @@
 package com.rolvatech.cgc.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.rolvatech.cgc.utils.PrefUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -64,9 +66,11 @@ public class ChangePasswordFragment extends Fragment {
             JwtRequest request=new JwtRequest();
             request.setPassword(edtNewPassword.getText().toString());
             request.setUsername(PrefUtils.getStringPreference(getActivity(), PrefUtils.KEY_USER));
+            showDialog();
             new APIClient(getActivity()).getApi().updatePassword("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), request).enqueue(new Callback<JSONObject>() {
                 @Override
                 public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                    hideDialog();
                     if (response.isSuccessful() || response.code() == 200) {
                         alertDialogManager.showAlertDialog(getActivity(), "Success", "Password changed successfully", true);
                     } else {
@@ -76,10 +80,29 @@ public class ChangePasswordFragment extends Fragment {
 
                 @Override
                 public void onFailure(Call<JSONObject> call, Throwable t) {
-
+                    hideDialog();
                 }
             });
 
     }
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

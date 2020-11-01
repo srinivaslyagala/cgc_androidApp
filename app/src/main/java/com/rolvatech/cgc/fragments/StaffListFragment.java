@@ -1,5 +1,6 @@
 package com.rolvatech.cgc.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,10 +88,11 @@ public class StaffListFragment extends Fragment {
     }
 
     public void getStaff() {
-
+        showDialog();
         new APIClient(getActivity()).getApi().getStaff("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<UserDTO>>() {
             @Override
             public void onResponse(Call<List<UserDTO>> call, Response<List<UserDTO>> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     staffDTOList = new ArrayList<>();
                     //  try {
@@ -151,8 +154,28 @@ public class StaffListFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<UserDTO>> call, Throwable t) {
+                hideDialog();
                 Log.e("error", t.getMessage());
             }
         });
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.rolvatech.cgc.fragments;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -123,10 +125,12 @@ public class MyProfileFragment extends Fragment {
             user.setEmail(edtEmail.getText().toString());
             user.setProfileImage(profileImage);
             user.setId(staffDTO.getId());
+            showDialog();
             new APIClient(getActivity()).getApi().updateProfile("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), user)
                     .enqueue(new Callback<UserDTO>() {
                         @Override
                         public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                            hideDialog();
                             if (response.isSuccessful() || response.code() == 200) {
                                 alertDialogManager.showAlertDialog(getActivity(), "Success", "Details updated successfully", true);
                             } else {
@@ -136,7 +140,7 @@ public class MyProfileFragment extends Fragment {
 
                         @Override
                         public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                            hideDialog();
                         }
                     });
         }else{
@@ -145,9 +149,11 @@ public class MyProfileFragment extends Fragment {
     }
 
     private void getStaffDetails(String userId, View root) {
+        showDialog();
         new APIClient(getActivity()).getApi().getUserDetailsById("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),userId).enqueue(new Callback<UserDTO>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                hideDialog();
                 if(response.code() == 200){
                     try {
                         UserDTO staffDetails = response.body();
@@ -190,7 +196,7 @@ public class MyProfileFragment extends Fragment {
 
             @Override
             public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                hideDialog();
             }
         });
     }
@@ -278,6 +284,24 @@ public class MyProfileFragment extends Fragment {
                     }
                 }
             }
+        }
+    }
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
         }
     }
 }

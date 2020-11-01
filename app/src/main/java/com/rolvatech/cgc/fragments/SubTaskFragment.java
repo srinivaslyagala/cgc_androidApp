@@ -1,5 +1,6 @@
 package com.rolvatech.cgc.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +35,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -82,10 +84,12 @@ public class SubTaskFragment extends Fragment {
 
 
     public void getSubTasks() {
+        showDialog();
         new APIClient(getActivity()).getApi().getSubTasks("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), String.valueOf(taskId)).enqueue(new Callback<TaskDTO>() {
             @Override
             public void onResponse(Call<TaskDTO> call, Response<TaskDTO> response) {
                 subTaskDTOS = new ArrayList<>();
+                hideDialog();
                 if (response.code() == 200) {
                     taskDTO = response.body();
                     if (taskDTO.getSubTasks() != null && taskDTO.getSubTasks().size() > 0) {
@@ -144,9 +148,28 @@ public class SubTaskFragment extends Fragment {
 
             @Override
             public void onFailure(Call<TaskDTO> call, Throwable t) {
-
+                hideDialog();
             }
         });
+    }
+
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 
 }

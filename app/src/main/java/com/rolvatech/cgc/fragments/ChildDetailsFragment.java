@@ -255,11 +255,12 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
             user.setTimeSlot(edtTimeSlot.getText().toString());
             user.setAboutMe(child.getAboutMe());
             user.setId(child.getId());
-
+            showDialog("Loading...");
             new APIClient(getActivity()).getApi().updateProfile("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), user)
                     .enqueue(new Callback<UserDTO>() {
                         @Override
                         public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                            hideDialog();
                             if (response.isSuccessful() || response.code() == 200) {
                                 alertDialogManager.showAlertDialog(getActivity(), "Success", "Child Details updated successfully", true);
                                 Bundle bundle = new Bundle();
@@ -273,7 +274,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
 
                         @Override
                         public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                            hideDialog();
                         }
                     });
         }
@@ -385,20 +386,23 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
     }
 
     public void deactivateChild() {
+        showDialog("Loading....");
         new APIClient(getActivity()).getApi().deactivateUser("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), child.getId())
                 .enqueue(new Callback<UserDTO>() {
                     @Override
                     public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                         if (response.isSuccessful() || response.code() == 200) {
+                            hideDialog();
                             alertDialogManager.showAlertDialog(getActivity(), "Success", "Child deleted successfully", true);
                         } else {
+                            hideDialog();
                             alertDialogManager.showAlertDialog(getActivity(), "Failure", "Child deletion failed", false);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                        hideDialog();
                     }
                 });
 
@@ -539,22 +543,25 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
         AlertDialog.Builder areaListDialog = new AlertDialog.Builder(getContext());
         areaListDialog.setTitle("Select Area");
         final ArrayAdapter<String> areaListAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_singlechoice);
-
+        showDialog("Loading...");
         new APIClient(getActivity()).getApi().getAreas("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<AreaDTO>>() {
             @Override
             public void onResponse(Call<List<AreaDTO>> call, Response<List<AreaDTO>> response) {
                 if (response.isSuccessful()) {
                     assert response.body() != null;
+                    hideDialog();
                     areaDtoList = response.body().subList(0, response.body().size());
                     for (AreaDTO area : areaDtoList) {
                         areaListAdapter.add(area.getId() + " " + area.getAreaName());
                     }
                 } else {
+                    hideDialog();
                 }
             }
 
             @Override
             public void onFailure(Call<List<AreaDTO>> call, Throwable t) {
+                hideDialog();
             }
         });
         areaListDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -569,10 +576,12 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
             public void onClick(DialogInterface areaDialog, int i) {
                 String selectedArea = areaListAdapter.getItem(i);
                 Long areaId = Long.parseLong(selectedArea.substring(0, selectedArea.indexOf(' ')));
+                showDialog("Loading...");
                 new APIClient(getActivity()).getApi().getTasksforArea("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), areaId).enqueue(new Callback<List<TaskDTO>>() {
                     @Override
                     public void onResponse(Call<List<TaskDTO>> call, Response<List<TaskDTO>> response) {
                         if (response.isSuccessful()) {
+                            hideDialog();
                             assert response.body() != null;
                             taskListDto = response.body().subList(0, response.body().size());
                             AlertDialog.Builder taskListDialog = new AlertDialog.Builder(getContext());
@@ -661,24 +670,29 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                                         removedTasks.add(addedTask);
                                     }
                                     removedChildTask.setTasks(removedTasks);
+                                    showDialog("Loading...");
                                     new APIClient(getContext()).getApi().assignTaskToChild("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), addedChildTask).enqueue(new Callback<ChildTaskDTO>() {
                                         @Override
                                         public void onResponse(Call<ChildTaskDTO> call, Response<ChildTaskDTO> response) {
                                             Toast.makeText(getContext(), "Tasks has been added Successfully!", Toast.LENGTH_LONG);
+                                            hideDialog();
                                         }
 
                                         @Override
                                         public void onFailure(Call<ChildTaskDTO> call, Throwable t) {
+                                            hideDialog();
                                         }
                                     });
-
+                                    showDialog("Loading...");
                                     new APIClient(getContext()).getApi().deAssignTaskToChild("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), removedChildTask).enqueue(new Callback<ChildTaskDTO>() {
                                         @Override
                                         public void onResponse(Call<ChildTaskDTO> call, Response<ChildTaskDTO> response) {
+                                            hideDialog();
                                         }
 
                                         @Override
                                         public void onFailure(Call<ChildTaskDTO> call, Throwable t) {
+                                            hideDialog();
                                         }
                                     });
                                     dialogInterface.dismiss();
@@ -686,12 +700,14 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                                 }
                             });
                             taskListDialog.show();
+                        }else{
+                            hideDialog();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<TaskDTO>> call, Throwable t) {
-
+                        hideDialog();
                     }
                 });
 
@@ -848,7 +864,6 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                     .setMessage("Loading...")
                     .build();
         }
-
         spotsDialog.show();
     }
 

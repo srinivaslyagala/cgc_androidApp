@@ -33,6 +33,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -101,16 +102,18 @@ public class TaskListFragment extends Fragment {
                TaskDTO taskDto=new TaskDTO();
                taskDto.setTaskName(areaName);
                taskDto.setArea(areaDTO);
+               showDialog();
                new APIClient(getContext()).getApi().createTask("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),taskDto).enqueue(new Callback<TaskDTO>() {
                    @Override
                    public void onResponse(Call<TaskDTO> call, Response<TaskDTO> response) {
+                       hideDialog();
                        assert response.body()!=null;
                        Toast.makeText(getContext(),"Area Added Successfully",Toast.LENGTH_LONG);
                    }
 
                    @Override
                    public void onFailure(Call<TaskDTO> call, Throwable t) {
-
+                        hideDialog();
                    }
                });
             }
@@ -126,10 +129,11 @@ public class TaskListFragment extends Fragment {
     }
 
     public void getAreas() {
-
+        showDialog();
         new APIClient(getActivity()).getApi().getTasksforArea("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),areaDTO.getId()).enqueue(new Callback<List<TaskDTO>>() {
             @Override
             public void onResponse(Call<List<TaskDTO>> call, Response<List<TaskDTO>> response) {
+                hideDialog();
                 if (response.code() == 200) {
                     areaDTOList = new ArrayList<>();
                     //  try {
@@ -157,8 +161,26 @@ public class TaskListFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<TaskDTO>> call, Throwable throwable) {
-
+                hideDialog();
             }
         });
+    }
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

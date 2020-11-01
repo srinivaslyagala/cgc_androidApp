@@ -1,5 +1,6 @@
 package com.rolvatech.cgc.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -130,6 +132,7 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
     }
 
     public void updateStatus(long id, String status) {
+        showDialog();
             SubTaskDTO subTaskDTO=new SubTaskDTO();
             TaskDTO taskDto=new TaskDTO();
             taskDto.setId(taskDTO.getId());
@@ -139,6 +142,7 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
             new APIClient(CGCApplication.app()).getApi().updateSubTask("Bearer " + PrefUtils.getStringPreference(CGCApplication.app(), PrefUtils.TOKEN), subTaskDTO).enqueue(new Callback<SubTaskDTO>() {
                 @Override
                 public void onResponse(Call<SubTaskDTO> call, Response<SubTaskDTO> response) {
+                    hideDialog();
                     if (response.isSuccessful() || response.code() == 200) {
                         alertDialogManager.showAlertDialog(context, "Success", "Status updated successfully", true);
                     } else {
@@ -148,12 +152,13 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
 
                 @Override
                 public void onFailure(Call<SubTaskDTO> call, Throwable t) {
-
+                    hideDialog();
                 }
             });
     }
 
     public void updateSubTask(long id, String name, String description) {
+        showDialog();
             SubTaskDTO subTaskDTO=new SubTaskDTO();
             TaskDTO taskDto=new TaskDTO();
             taskDto.setId(taskDTO.getId());
@@ -165,6 +170,7 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
             new APIClient(CGCApplication.app()).getApi().updateSubTask("Bearer " + PrefUtils.getStringPreference(CGCApplication.app(), PrefUtils.TOKEN), subTaskDTO).enqueue(new Callback<SubTaskDTO>() {
                 @Override
                 public void onResponse(Call<SubTaskDTO> call, Response<SubTaskDTO> response) {
+                    hideDialog();
                     if (response.isSuccessful() || response.code() == 200) {
                         alertDialogManager.showAlertDialog(context, "Success", "subtask updated successfully", true);
                     } else {
@@ -174,12 +180,13 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
 
                 @Override
                 public void onFailure(Call<SubTaskDTO> call, Throwable t) {
-
+hideDialog();
                 }
             });
     }
 
     public void addSubTask(long id, String name, String description) {
+        showDialog();
         SubTaskDTO subTaskDTO=new SubTaskDTO();
         TaskDTO taskDto=new TaskDTO();
         Log.i("Add SubTasks", "addSubTask: UserTaskID:"+taskDTO.getUserTaskId());
@@ -193,6 +200,7 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
         new APIClient(CGCApplication.app()).getApi().addSubTasktoChild("Bearer " + PrefUtils.getStringPreference(CGCApplication.app(), PrefUtils.TOKEN), subTaskDTO).enqueue(new Callback<SubTaskDTO>() {
             @Override
             public void onResponse(Call<SubTaskDTO> call, Response<SubTaskDTO> response) {
+                hideDialog();
                 if (response.isSuccessful() || response.code() == 200) {
                     alertDialogManager.showAlertDialog(context, "Success", "subtask added successfully", true);
                     notifyItemRemoved(0);
@@ -203,8 +211,26 @@ public class SubTaskListAdapter extends RecyclerView.Adapter<SubTaskListAdapter.
 
             @Override
             public void onFailure(Call<SubTaskDTO> call, Throwable t) {
-
+                hideDialog();
             }
         });
+    }
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(context)
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }

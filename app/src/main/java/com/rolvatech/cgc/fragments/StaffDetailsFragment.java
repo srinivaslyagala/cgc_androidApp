@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -123,10 +124,12 @@ public class StaffDetailsFragment extends Fragment {
     }
 
     public void deleteStaff() {
+        showDialog();
             new APIClient(getActivity()).getApi().deactivateUser("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), staffDTO.getId())
                     .enqueue(new Callback<UserDTO>() {
                         @Override
                         public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                            hideDialog();
                             if (response.isSuccessful() || response.code() == 200) {
                                 alertDialogManager.showAlertDialog(getActivity(), "Success", "staff deleted successfully", true);
                             } else {
@@ -136,7 +139,7 @@ public class StaffDetailsFragment extends Fragment {
 
                         @Override
                         public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                            hideDialog();
                         }
                     });
 
@@ -144,9 +147,11 @@ public class StaffDetailsFragment extends Fragment {
 
     private void getStaffDetails(UserDTO staffDTO, View root) {
         Log.e("splash","StaffId:"+staffDTO.getId());
+        showDialog();
         new APIClient(getActivity()).getApi().getUserDetailsById("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),staffDTO.getId()).enqueue(new Callback<UserDTO>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                hideDialog();
                 if(response.code() == 200){
                     try {
                         UserDTO staffDetails = response.body();
@@ -184,13 +189,15 @@ public class StaffDetailsFragment extends Fragment {
 
             @Override
             public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                hideDialog();
             }
         });
+        showDialog();
         new APIClient(getActivity()).getApi().getChildListForStaff("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),staffDTO.getId()).enqueue(
                 new Callback<List<Child>>() {
                     @Override
                     public void onResponse(Call<List<Child>> call, Response<List<Child>> response) {
+                        hideDialog();
                         if(response.code() == 200){
                             List<Child> childrensList=response.body();
                             childListAdapter = new ChildListAdapter(childrensList);
@@ -229,7 +236,7 @@ public class StaffDetailsFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<List<Child>> call, Throwable t) {
-
+                        hideDialog();
                     }
                 }
         );
@@ -244,10 +251,12 @@ public class StaffDetailsFragment extends Fragment {
             user.setEmail(edtEmail.getText().toString());
             user.setProfileImage(profileImage);
             user.setId(staffDTO.getId());
+            showDialog();
             new APIClient(getActivity()).getApi().updateProfile("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), user)
                     .enqueue(new Callback<UserDTO>() {
                         @Override
                         public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                            hideDialog();
                             if (response.isSuccessful() || response.code() == 200) {
                                 alertDialogManager.showAlertDialog(getActivity(), "Success", "Staff details updated successfully", true);
                             } else {
@@ -257,7 +266,7 @@ public class StaffDetailsFragment extends Fragment {
 
                         @Override
                         public void onFailure(Call<UserDTO> call, Throwable t) {
-
+                            hideDialog();
                         }
                     });
         }else{
@@ -372,5 +381,23 @@ public class StaffDetailsFragment extends Fragment {
                 .compress(512)            //Final image size will be less than 1 MB(Optional)
                 .maxResultSize(500, 500)    //Final image resolution will be less than 1080 x 1080(Optional)
                 .start(REQUEST_IMAGE_CODE);
+    }
+    AlertDialog spotsDialog;
+
+    private void showDialog() {
+
+        if (spotsDialog == null) {
+            spotsDialog = new SpotsDialog.Builder()
+                    .setContext(getActivity())
+                    .setMessage("Loading...")
+                    .build();
+        }
+        spotsDialog.show();
+    }
+
+    private void hideDialog() {
+        if (spotsDialog != null) {
+            spotsDialog.dismiss();
+        }
     }
 }
