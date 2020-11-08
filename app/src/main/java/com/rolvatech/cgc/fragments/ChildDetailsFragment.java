@@ -310,73 +310,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                             }
                         });
             } else {
-
                 loadStaffList();
-
-                /*AlertDialog.Builder builderSingle = new AlertDialog.Builder(getContext());
-                builderSingle.setTitle("Select Staff");
-                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_singlechoice);
-                new APIClient(getActivity()).getApi().getStaff("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN)).enqueue(new Callback<List<UserDTO>>() {
-                    @Override
-                    public void onResponse(Call<List<UserDTO>> call, Response<List<UserDTO>> response) {
-                        if (response.code() == 200) {
-                            staffDTOList = new ArrayList<>();
-                            assert response.body() != null;
-                            //StaffDTO[] enums = gson.fromJson(yourJson, ChannelSearchEnum[].class);
-                            staffDTOList =  response.body().subList(0, response.body().size());
-                            for(UserDTO staff:staffDTOList){
-                                arrayAdapter.add(staff.getId() +" "+staff.getFirstName()+" "+staff.getLastName());
-                            }
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<List<UserDTO>> call, Throwable t) {
-                        Log.e("error", t.getMessage());
-                    }
-                });
-                builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-
-                int checkedItem=0;
-                builderSingle.setSingleChoiceItems(arrayAdapter,checkedItem, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String strName = arrayAdapter.getItem(which);
-                        Log.i("AssignStaff", "onClick: Selected Staff Id:"+strName+" staffId:"+strName.substring(0,strName.indexOf(' ')));
-                        String staffId=strName.substring(0,strName.indexOf(' '));
-                        UserDTO user=new UserDTO();
-                        StaffDTO staff=new StaffDTO();
-                        staff.setId(Long.parseLong(staffId));
-                        user.setStaff(staff);
-                        user.setId(child.getId());
-                        new APIClient(getActivity()).getApi().assignStafftoChild("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN),user).enqueue(new Callback<UserDTO>() {
-                            @Override
-                            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
-                                if (response.code() == 200) {
-                                    if (response.isSuccessful() || response.code() == 200) {
-                                        alertDialogManager.showAlertDialog(getActivity(), "Success", "Staff Assigned successfully", true);
-                                        edtStaffNameAssigned.setText(strName.substring(strName.indexOf(' ')));
-                                        btnDeAssignStaff.setText("De-assign Staff");
-                                    } else {
-                                        alertDialogManager.showAlertDialog(getActivity(), "Failure", "Staff Assigned failed", false);
-                                    }
-                                }
-                            }
-                            @Override
-                            public void onFailure(Call<UserDTO> call, Throwable t) {
-                                Log.e("error", t.getMessage());
-                            }
-                        });
-                        dialog.dismiss();
-                    }
-                });
-                builderSingle.show();*/
-
-
             }
 
         } catch (Exception e) {
@@ -537,7 +471,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
     }
 
     private void assignNewTasks() {
-
+        getAssignedTasks(child.getId());
         ConcurrentMap<Long, TaskDTO> selectedTasks = new ConcurrentHashMap<>();
         ConcurrentMap<Long, TaskDTO> removedTasks = new ConcurrentHashMap<>();
         AlertDialog.Builder areaListDialog = new AlertDialog.Builder(getContext());
@@ -589,20 +523,16 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                             ArrayList<String> taskList = new ArrayList<>();
                             ArrayList<Boolean> checkedTasks = new ArrayList<Boolean>();
                             final ArrayAdapter<String> taskListAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_multichoice);
+                            List<TaskDTO> assignedTasks = expandableListDetail.get(taskListDto.get(0).getArea().getAreaName());
                             for (TaskDTO taskDto : taskListDto) {
-                                taskList.add(taskDto.getId() + " " + taskDto.getTaskName());
-                                taskListAdapter.add(taskDto.getId() + " " + taskDto.getTaskName());
-                                //checkedTasks.add(false);
-                                List<TaskDTO> assignedTasks = expandableListDetail.get(taskDto.getArea().getAreaName());
-                                if (null != assignedTasks && !assignedTasks.isEmpty()) {
-                                    for (TaskDTO assignedTask : assignedTasks) {
-                                        if (assignedTask.getId() == taskDto.getId()) {
-                                            checkedTasks.add(true);
-                                            selectedTasks.put(assignedTask.getId(), taskDto);
-                                        } else {
-                                            checkedTasks.add(false);
-                                        }
-                                    }
+                                taskList.add(taskDto.getTaskNumber() + " " + taskDto.getTaskName());
+                                taskListAdapter.add(taskDto.getTaskNumber() + " " + taskDto.getTaskName());
+                                if(assignedTasks!=null){
+                                    Log.i("TaskList", "onClick: assignedTasks:" + assignedTasks.size());
+                                }
+                                boolean found= findTaskAssigned(assignedTasks,taskDto,selectedTasks);
+                                if (found) {
+                                    checkedTasks.add(true);
                                 } else {
                                     checkedTasks.add(false);
                                 }
@@ -610,9 +540,14 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                             CharSequence[] taskListArray = new CharSequence[taskList.size()];
                             taskList.toArray(taskListArray);
                             Log.i("TaskList", "onClick: taskListArray:" + taskListArray.length);
-                            boolean[] checkedTaskArray = new boolean[taskList.size()];
-                            for (int j = 0; j < checkedTasks.size(); j++) {
-                                checkedTaskArray[j] = checkedTasks.get(j);
+                            Log.i("TaskList","CheckedTasks Array:"+checkedTasks);
+                            boolean[] checkedTaskArray = new boolean[taskListArray.length];
+                            int i=0;
+                            for(Boolean b:checkedTasks){
+                                if(i<taskListArray.length) {
+                                    checkedTaskArray[i] = b;
+                                }
+                                i++;
                             }
                             Log.i("TaskList", "onClick: checkedTaskArray:" + checkedTaskArray.length);
                             Log.i("AreaADialog", "onClick: On Area Selection:" + selectedArea);
@@ -620,15 +555,16 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                                 @Override
                                 public void onClick(DialogInterface taskDialog, int i, boolean b) {
                                     String task = new String(taskListArray[i].toString());
-                                    Long taskId = new Long(task.substring(0, task.indexOf(' ')));
+                                    Long taskNumber = new Long(task.substring(0, task.indexOf(' ')));
+                                    Long taskDto=findSelectedTask(taskListDto,taskNumber);
                                     if (b) {
                                         TaskDTO addedTask = new TaskDTO();
-                                        addedTask.setId(taskId);
-                                        selectedTasks.put(taskId, addedTask);
+                                        addedTask.setId(taskDto);
+                                        selectedTasks.put(taskDto, addedTask);
                                     } else {
                                         TaskDTO removedTask = new TaskDTO();
-                                        removedTask.setId(taskId);
-                                        removedTasks.put(taskId, removedTask);
+                                        removedTask.setId(taskDto);
+                                        removedTasks.put(taskDto, removedTask);
                                     }
                                 }
                             });
@@ -642,7 +578,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     Log.i("SelectedTask", "Selected Tasks List" + selectedTasks.toString());
-                                    Log.i("RemovedTask", "Removed Tasks List" + selectedTasks.toString());
+                                    Log.i("RemovedTask", "Removed Tasks List" + removedTasks.toString());
                                     Set<Long> selected = selectedTasks.keySet();
                                     Set<Long> removed = removedTasks.keySet();
                                     for (Long taskId : removed) {
@@ -664,7 +600,7 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
                                     ChildTaskDTO removedChildTask = new ChildTaskDTO();
                                     removedChildTask.setId(child.getId());
                                     List<TaskDTO> removedTasks = new ArrayList<>();
-                                    for (Long id : selected) {
+                                    for (Long id : removed) {
                                         TaskDTO addedTask = new TaskDTO();
                                         addedTask.setId(id);
                                         removedTasks.add(addedTask);
@@ -715,6 +651,33 @@ public class ChildDetailsFragment extends Fragment implements TabLayout.OnTabSel
 
         });
         areaListDialog.show();
+    }
+
+    private Long findSelectedTask(List<TaskDTO> taskListDto, Long taskNumber) {
+        Long taskId=null;
+        Log.i("Selected:","Seleceted TaskNo:"+taskNumber+" TaskList:"+taskListDto);
+        for(TaskDTO task:taskListDto){
+            if(task.getTaskNumber().equals(taskNumber)){
+                taskId=task.getId();
+                break;
+            }
+        }Log.i("Selected:","Seleceted TaskNo:"+taskNumber+" Task:"+taskId);
+
+        return taskId;
+    }
+
+    private boolean findTaskAssigned(List<TaskDTO> assignedTasks, TaskDTO taskDto, ConcurrentMap<Long, TaskDTO> selectedTasks) {
+        boolean present=false;
+        if (null != assignedTasks && !assignedTasks.isEmpty()) {
+            for (TaskDTO task:assignedTasks){
+                if(task.getId() == taskDto.getId()){
+                    present=true;
+                    selectedTasks.put(task.getId(), taskDto);
+                    break;
+                }
+            }
+        }
+        return present;
     }
 
     private boolean checkTaskAlreadyAssigned(Long taskId) {

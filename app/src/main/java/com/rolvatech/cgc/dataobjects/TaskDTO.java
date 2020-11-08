@@ -116,6 +116,7 @@ public class TaskDTO implements Serializable {
                 ", status='" + status + '\'' +
                 ", level=" + level +
                 ", subTasks=" + subTasks +
+                ", taskNumber="+taskNumber+
                 '}';
     }
 
