@@ -9,6 +9,16 @@ public class AreaTaskDTO implements Serializable {
 
     private String name;
 
+    @Override
+    public String toString() {
+        return "AreaTaskDTO{" +
+                "name='" + name + '\'' +
+                ", areaNumber=" + areaNumber +
+                ", id=" + id +
+                ", tasks=" + tasks +
+                '}';
+    }
+
     private Long areaNumber;
 
     private Long id;

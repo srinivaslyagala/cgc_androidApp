@@ -151,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:layout_marginTop="@dimen/margin_10"
-            android:text="Deativate Child"
+            android:text="Deactivate Child"
             android:textAllCaps="true"
             tools:ignore="RtlHardcoded" />
 
@@ -185,7 +185,7 @@
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="1000dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

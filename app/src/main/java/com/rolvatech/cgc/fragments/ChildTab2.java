@@ -27,7 +27,10 @@ import com.rolvatech.cgc.dataobjects.UserDTO;
 import com.rolvatech.cgc.utils.PrefUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -71,7 +74,7 @@ public class ChildTab2 extends Fragment {
         return rootView;
     }
 
-    private void getAssignedTasks(Long childId) {
+    public void getAssignedTasks(Long childId) {
         showDialog("Loading...");
         new APIClient(getActivity()).getApi().getChildTasksByArea("Bearer " + PrefUtils.getStringPreference(getActivity(), PrefUtils.TOKEN), (childId)).enqueue(new Callback<List<AreaTaskDTO>>() {
             @Override
@@ -79,9 +82,16 @@ public class ChildTab2 extends Fragment {
                 hideDialog();
                 if (response.code() == 200) {
                     List<AreaTaskDTO> areaDTOS = response.body().subList(0, response.body().size());
-                    expandableListDetail = new HashMap<>();
+                    expandableListDetail = new LinkedHashMap<>();
                     for (int i = 0; i < areaDTOS.size(); i++) {
-                        expandableListDetail.put(areaDTOS.get(i).getAreaNumber()+" - "+areaDTOS.get(i).getName(), areaDTOS.get(i).getTasks());
+                        List<TaskDTO> tasksList=areaDTOS.get(i).getTasks();
+                        Collections.sort(tasksList, new Comparator<TaskDTO>() {
+                            @Override
+                            public int compare(TaskDTO t0, TaskDTO t1) {
+                                return t0.getTaskNumber().compareTo(t1.getTaskNumber());
+                            }
+                        });
+                        expandableListDetail.put(areaDTOS.get(i).getAreaNumber()+" - "+areaDTOS.get(i).getName(), tasksList);
                     }
                     expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
                     expandableListAdapter = new CustomExpandableListAdapter(getContext(), expandableListTitle, expandableListDetail);

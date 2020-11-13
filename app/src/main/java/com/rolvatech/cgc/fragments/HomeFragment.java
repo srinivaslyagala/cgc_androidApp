@@ -108,7 +108,6 @@ public class HomeFragment extends Fragment {
         fragmentTransaction = fm.beginTransaction();
 // replace the FrameLayout with new Fragment
         fragmentTransaction.replace(R.id.content_frame, fragment);
-
         fragmentTransaction.commit();
     }
     AlertDialog spotsDialog;

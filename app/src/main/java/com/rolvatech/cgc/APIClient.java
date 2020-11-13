@@ -54,9 +54,9 @@ public class APIClient {
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                .connectTimeout(2, TimeUnit.MINUTES)
-                .writeTimeout(2, TimeUnit.MINUTES)
-                .readTimeout(2, TimeUnit.MINUTES)
+                .connectTimeout(5, TimeUnit.MINUTES)
+                .writeTimeout(5, TimeUnit.MINUTES)
+                .readTimeout(5, TimeUnit.MINUTES)
                 .build();
         Retrofit retrofit = new Retrofit.Builder().baseUrl(BuildConfig.SERVER_URL).client(client).addConverterFactory(GsonConverterFactory.create(gson)).build();
         mApiService = retrofit.create(ApiService.class);
